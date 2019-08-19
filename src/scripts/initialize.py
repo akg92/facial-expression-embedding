@@ -1,5 +1,7 @@
-from src.data.dataRep import FCEXPDataSet
-from src.config.staticConfig import StaticConfig 
+import sys
+sys.path.append('..')
+from data.dataRep import FCEXPDataSet
+from config.staticConfig import StaticConfig 
 ### Command line options should be added in future
 
 

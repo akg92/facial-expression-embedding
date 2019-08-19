@@ -1,10 +1,12 @@
 
 from concurrent.futures import ThreadPoolExecutor
 from multiprocessing import Pool
+from .preprocess import Downloader
 class Image():
 
-    def __init__(self, url, topLeftCol, bottomRigthCol, topLeftRow, bottomRightRow ):
+    def __init__(self, url, topLeftCol, bottomRightCol, topLeftRow, bottomRightRow ):
         self.url = url
+        self.url = self.url.replace("\"","")
         self.topLeftCol = float(topLeftCol)
         self.bottomRightCol = float(bottomRightCol)
         self.topLeftRow = float(topLeftRow)
@@ -25,9 +27,10 @@ class Entry():
         self.images = []
         self.ratings = []
         fields = row.split(",")
+
         for i in range(3):
             col = i * 5
-            self.images.append( Image(fields[i], fields[i+1], fields[i+2], fields[i+3], fields[i+4]))
+            self.images.append( Image(fields[col], fields[col+1], fields[col+2], fields[col+3], fields[col+4]))
         
         self.type = fields[15]
         for i in range(16, len(fields) , 2):
@@ -57,7 +60,9 @@ class FCEXPDataSet():
         pool = ThreadPoolExecutor(nThread)
         for entry in self.entries:
             #Downloader.download(entry.url)
-            pool.submit(Downloader.download, ( self.type == 'train', entry.url))
+            for e in entry.images:
+                ##pool.submit(Downloader.download, ( self.type == 'train', e.url))
+                Downloader.download( self.type == 'train', e.url)
         
         
     
