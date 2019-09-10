@@ -10,7 +10,7 @@ trainEntries = FCEXPDataSet(StaticConfig.getTrainCSVPath())
 trainEntries.downloadImages()
 trainEntries.cutImages()
 del trainEntries
-testEntries = FCEXPDataSet(StaticConfig.getTestCSVPath())
+testEntries = FCEXPDataSet(StaticConfig.getTestCSVPath(), "test")
 testEntries.cutImages()
 testEntries.downloadImages()
 del testEntries
