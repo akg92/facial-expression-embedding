@@ -107,3 +107,4 @@ data/*
 src/model/*
 *.xml
 *.iml
+model2/
