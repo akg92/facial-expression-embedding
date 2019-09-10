@@ -52,6 +52,8 @@ class Downloader():
             Downloader.error_log(url)
             return False
         return True
+
+        
     
 
 

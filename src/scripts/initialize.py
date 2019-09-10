@@ -8,9 +8,11 @@ from config.staticConfig import StaticConfig
 ## download images from the url
 trainEntries = FCEXPDataSet(StaticConfig.getTrainCSVPath())
 trainEntries.downloadImages()
+trainEntries.cut_images()
 del trainEntries
 testEntries = FCEXPDataSet(StaticConfig.getTestCSVPath())
 testEntries.downloadImages()
 del testEntries
+
 
 
