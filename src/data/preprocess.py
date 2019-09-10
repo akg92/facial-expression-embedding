@@ -8,6 +8,7 @@ from threading import Lock
 lock = Lock()
 class Downloader():
     errors = []
+    error_set = set()
     writing = False
     @staticmethod
     def error_log(log):
@@ -29,6 +30,8 @@ class Downloader():
 
     @staticmethod
     def download(train,url):
+        if(url  in Downloader.error_set):
+            return False
         destPath = StaticConfig.getImagePath(url, train)
         #print(destPath)
         folder =  "train" if train else "test"
@@ -45,6 +48,7 @@ class Downloader():
             
         except Exception as e :
             print(url)
+            Downloader.error_set.add(url)
             Downloader.error_log(url)
             return False
         return True
