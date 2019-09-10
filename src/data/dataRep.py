@@ -58,11 +58,16 @@ class FCEXPDataSet():
 
     def downloadImages(self,nThread = 10):
         pool = ThreadPoolExecutor(nThread)
+        Downloader.error_set = set()
         for entry in self.entries:
             #Downloader.download(entry.url)
             for e in entry.images:
                 ##pool.submit(Downloader.download, ( self.type == 'train', e.url))
                 Downloader.download( self.type == 'train', e.url)
+
+        with open('total_error.txt','w+') as f:
+            f.write("Total error {} {} \n".format(self.type,len(Downloader.error_set)))
+
         
         
     
