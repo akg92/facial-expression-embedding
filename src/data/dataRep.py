@@ -4,7 +4,7 @@ from multiprocessing import Pool
 from .preprocess import Downloader
 import os
 import cv2
-from mira.core import Image
+from mira.core import Image as miraImage
 from mira import detectors
 from src.config.staticConfig import StaticConfig 
 class Image():
@@ -40,7 +40,7 @@ class Image():
         cutIme = npArray[tleftcol:brightcol, topleftrow:brighttrow]
         cv2.imwrite(tempFileName, cutIme)
         ## do preprocessing
-        mImage = Image.read(tempFileName)
+        mImage = miraImage.read(tempFileName)
         detector = detectors.MTCNN()
         faces = detector.detect(mImage)
         if( not faces or not faces[0]):
