@@ -32,15 +32,15 @@ class Image():
         tleftcol = int( self.topLeftCol*width)
         brightcol = int(self.bottomRightCol*width)
         topleftrow = int(self.topLeftRow*height)
-        brighttrow = int(self.bottomRightRow*height)
+        brightrow = int(self.bottomRightRow*height)
 
-        processdFileName = processedFileNamePrefix + "{}_{}_{}_{}.jpg".format(tleftcol, brightcol, topleftrow, brighttrow)
-        tempFileName = processedFileNamePrefix + "{}_{}_{}_{}_temp.jpg".format(tleftcol, brightcol, topleftrow, brighttrow)
+        processdFileName = processedFileNamePrefix + "{}_{}_{}_{}.jpg".format(tleftcol, brightcol, topleftrow, brightrow)
+        tempFileName = processedFileNamePrefix + "{}_{}_{}_{}_temp.jpg".format(tleftcol, brightcol, topleftrow, brightrow)
         ## file exist
         if( os.path.exists(processdFileName)):
             counter.dec()
             return True
-        cutIme = npArray[tleftcol:brightcol, topleftrow:brighttrow]
+        cutIme = npArray[tleftcol:brightcol, topleftrow:brightrow]
         cv2.imwrite(tempFileName, cutIme)
         ## do preprocessing
         mImage = miraImage.read(tempFileName)
