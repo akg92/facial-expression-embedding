@@ -7,6 +7,7 @@ import cv2
 from mira.core import Image as miraImage
 from mira import detectors
 from src.config.staticConfig import StaticConfig 
+import threading
 class Image():
 
     def __init__(self, url, topLeftCol, bottomRightCol, topLeftRow, bottomRightRow ):
@@ -18,9 +19,10 @@ class Image():
         self.bottomRightRow = float(bottomRightRow)
         self.width = -1
     
-    def  resizeImage(self, isTrain):
+    def  resizeImage(self, isTrain, counter):
         originalFileName = StaticConfig.getImagePath(self.url, isTrain)
         if not os.path.exists(originalFileName):
+            counter.dec()
             return False
 
         processedFileNamePrefix = StaticConfig.getImageProcessedPath(self.url, isTrain)
@@ -36,6 +38,7 @@ class Image():
         tempFileName = processedFileNamePrefix + "{}_{}_{}_{}_temp.jpg".format(tleftcol, brightcol, topleftrow, brighttrow)
         ## file exist
         if( os.path.exists(processdFileName)):
+            counter.dec()
             return True
         cutIme = npArray[tleftcol:brightcol, topleftrow:brighttrow]
         cv2.imwrite(tempFileName, cutIme)
@@ -53,10 +56,36 @@ class Image():
             resizedImage = cv2.resize(extractedImg, (160, 160))
             cv2.imwrite(processdFileName, resizedImage) 
         ## clear temp file
+        counter.dec()
         os.remove(tempFileName)
-        
 
 
+class AtomicInteger():
+    def __init__(self, value=0):
+        self._value = value
+        self._lock = threading.Lock()
+
+    def inc(self):
+        with self._lock:
+            self._value += 1
+            return self._value
+
+    def dec(self):
+        with self._lock:
+            self._value -= 1
+            return self._value
+
+
+    @property
+    def value(self):
+        with self._lock:
+            return self._value
+
+    @value.setter
+    def value(self, v):
+        with self._lock:
+            self._value = v
+            return self._value
 
 class Rating():
     def __init__(self, raterId, rating):
@@ -85,11 +114,15 @@ class Entry():
         
 class FCEXPDataSet():
 
+    N_THREAD = 50
+    
+
     def __init__(self, fileName, type = "train"):
         self.type = type
         self.fileName = fileName
         self.entries = []
         self.loadData()
+        self.counter = AtomicInteger()
     """
     Load csv data to object representation
     """
@@ -132,8 +165,13 @@ class FCEXPDataSet():
         
         for entry in self.entries:
             for img in entry.images:
-                img.resizeImage(isTrain)
-        
+                ## thread busy wait 
+                while(self.counter.value() > FCEXPDataSet.N_THREAD):
+                    pass 
+                self.counter.inc()
+                t1 = threading.Thread(name='resize thread', target = img.resizeImage, args = (isTrain, self.counter))
+                #img.resizeImage(isTrain)
+                t1.start()
 
 
         
