@@ -166,11 +166,11 @@ class FCEXPDataSet():
         for entry in self.entries:
             for img in entry.images:
                 ## thread busy wait 
-                while(self.counter.value > FCEXPDataSet.N_THREAD):
-                    pass 
+                #while(self.counter.value > FCEXPDataSet.N_THREAD):
+                #    pass 
                 self.counter.inc()
-                t1 = threading.Thread(name='resize thread', target = img.resizeImage, args = (isTrain, self.counter))
-                #img.resizeImage(isTrain)
+                #t1 = threading.Thread(name='resize thread', target = img.resizeImage, args = (isTrain, self.counter))
+                img.resizeImage(isTrain)
                 t1.start()
 
 
