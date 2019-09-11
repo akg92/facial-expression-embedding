@@ -20,7 +20,7 @@ class Image():
         self.bottomRightRow = float(bottomRightRow)
         self.width = -1
         if( not Image.detectors ):
-            detector = detectors.MTCNN()
+            Image.detector = detectors.MTCNN()
 
     def  resizeImage(self, isTrain, counter):
         originalFileName = StaticConfig.getImagePath(self.url, isTrain)
