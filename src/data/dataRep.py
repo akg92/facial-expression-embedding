@@ -30,7 +30,7 @@ class Image():
         tleftcol = int( self.topLeftCol*width)
         brightcol = int(self.bottomRightCol*width)
         topleftrow = int(self.topLeftRow*height)
-        brighttrow = int(self.topRightRow*height)
+        brighttrow = int(self.bottomRightRow*height)
 
         processdFileName = processedFileNamePrefix + "{}_{}_{}_{}.jpg".format(tleftcol, brightcol, topleftrow, brighttrow)
         tempFileName = processedFileNamePrefix + "{}_{}_{}_{}_temp.jpg".format(tleftcol, brightcol, topleftrow, brighttrow)
