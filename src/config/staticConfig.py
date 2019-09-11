@@ -57,6 +57,13 @@ class StaticConfig:
         imgDir = StaticConfig.getImageOutDir()
         return os.path.join(imgDir, "train_processed", fileName) if train else os.path.join(imgDir, "test_processed", fileName)
 
+    @staticmethod
+    def getImageProcessedPath(url, train):
+        last = url.split("/")[-1]
+        fileName = "img_" + StaticConfig._hashCode(last) + "_" + StaticConfig._hashCode(url)+".jpg"
+        imgDir = StaticConfig.getImageOutDir()
+        return os.path.join(imgDir, "train_processed", fileName) if train else os.path.join(imgDir, "test_processed", fileName)
+
     @staticmethod 
     def getImageProcessedDir(train):
         imgDir = StaticConfig.getImageOutDir()
