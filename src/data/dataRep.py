@@ -58,19 +58,6 @@ class Image():
 
 
 
-
-
-        
-
-        
-
-
-
-        cv2.imwrite(npArray, )
-
-
-
-
 class Rating():
     def __init__(self, raterId, rating):
         self.raterId = int(raterId)
