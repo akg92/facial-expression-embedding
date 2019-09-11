@@ -44,8 +44,9 @@ class Image():
         detector = detectors.MTCNN()
         faces = detector.detect(mImage)
         if( not faces or not faces[0]):
+            print('face_not_found for {}'.format(originalFileName))
             resizedImage = cv2.resize(cutIme, (160, 160))
-            cv2.imwrite(processdFileName, resizeImage) 
+            cv2.imwrite(processdFileName, resizedImage) 
         
         else :
             extractedImg = faces[0].selection.extract(mImage)
