@@ -31,7 +31,7 @@ class Image():
         processedFileNamePrefix = StaticConfig.getImageProcessedPath(self.url, isTrain)
         npArray = cv2.imread(originalFileName)
         if(npArray is None):
-            print("Error in reading file ##########################3{}".format(orginalFileName))
+            print("Error in reading file ##########################3{}".format(originalFileName))
             return 
         width = npArray.shape[1]
         height = npArray.shape[0]
