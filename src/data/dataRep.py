@@ -40,7 +40,7 @@ class Image():
         if( os.path.exists(processdFileName)):
             counter.dec()
             return True
-        cutIme = npArray[tleftcol:brightcol, topleftrow:brightrow]
+        cutIme = npArray[topleftrow:brightrow, tleftcol:brightcol]
         cv2.imwrite(tempFileName, cutIme)
         ## do preprocessing
         mImage = miraImage.read(tempFileName)
