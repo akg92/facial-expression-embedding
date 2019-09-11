@@ -10,6 +10,7 @@ from src.config.staticConfig import StaticConfig
 import threading
 class Image():
 
+    detector = None
     def __init__(self, url, topLeftCol, bottomRightCol, topLeftRow, bottomRightRow ):
         self.url = url
         self.url = self.url.replace("\"","")
@@ -18,7 +19,9 @@ class Image():
         self.topLeftRow = float(topLeftRow)
         self.bottomRightRow = float(bottomRightRow)
         self.width = -1
-    
+        if( not Image.detectors ):
+            Image.detector = detectors.MTCNN()
+
     def  resizeImage(self, isTrain, counter):
         originalFileName = StaticConfig.getImagePath(self.url, isTrain)
         if not os.path.exists(originalFileName):
@@ -44,8 +47,8 @@ class Image():
         cv2.imwrite(tempFileName, cutIme)
         ## do preprocessing
         mImage = miraImage.read(tempFileName)
-        detector = detectors.MTCNN()
-        faces = detector.detect(mImage)
+        
+        faces = Image.detector.detect(mImage)
         if( not faces or not faces[0]):
             print('face_not_found for {}'.format(originalFileName))
             resizedImage = cv2.resize(cutIme, (160, 160))
