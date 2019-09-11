@@ -30,6 +30,9 @@ class Image():
 
         processedFileNamePrefix = StaticConfig.getImageProcessedPath(self.url, isTrain)
         npArray = cv2.imread(originalFileName)
+        if(not npArray):
+            print("Error in reading file ##########################3{}".format(orginalFileName))
+            return 
         width = npArray.shape[1]
         height = npArray.shape[0]
         tleftcol = int( self.topLeftCol*width)
