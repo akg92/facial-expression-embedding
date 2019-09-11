@@ -66,14 +66,16 @@ class AtomicInteger():
         self._lock = threading.Lock()
 
     def inc(self):
-        with self._lock:
-            self._value += 1
-            return self._value
+        # with self._lock:
+        #     self._value += 1
+        #     return self._value
+        pass
 
     def dec(self):
-        with self._lock:
-            self._value -= 1
-            return self._value
+        # with self._lock:
+        #     self._value -= 1
+        #     return self._value
+        pass
 
 
     @property
@@ -168,10 +170,10 @@ class FCEXPDataSet():
                 ## thread busy wait 
                 #while(self.counter.value > FCEXPDataSet.N_THREAD):
                 #    pass 
-                self.counter.inc()
+                #self.counter.inc()
                 #t1 = threading.Thread(name='resize thread', target = img.resizeImage, args = (isTrain, self.counter))
-                img.resizeImage(isTrain)
-                t1.start()
+                img.resizeImage(isTrain,self.counter)
+                #t1.start()
 
 
         
