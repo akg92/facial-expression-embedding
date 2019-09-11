@@ -19,7 +19,7 @@ class Image():
         self.topLeftRow = float(topLeftRow)
         self.bottomRightRow = float(bottomRightRow)
         self.width = -1
-        if( not Image.detectors ):
+        if( not Image.detector):
             Image.detector = detectors.MTCNN()
 
     def  resizeImage(self, isTrain, counter):
