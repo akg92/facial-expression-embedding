@@ -35,7 +35,7 @@ facenet_model = load_model(modelFile)
 
 
 #!pip install git+https://www.github.com/keras-team/keras-contrib.git
-get_ipython().system('pwd')
+#get_ipython().system('pwd')
 
 
 # In[ ]:
