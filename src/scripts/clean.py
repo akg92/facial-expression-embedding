@@ -11,10 +11,19 @@ def is_valid(urls, is_train):
         if not os.path.exists(StaticConfig.getImagePath(url, is_train)):
             return False
     return True
+all_valid_entries = {}
+def get_key(is_train, row, index):
+    return '_'.join(row[index:index+5])+'_'+str(is_train)
+
 def get_processed_file_name( is_train, row, index):
+    key = get_key(is_train, row, index)
+    if( key in all_valid_entries):
+        return all_valid_entries[key]
     start_index = index*5
     img = Image(row[start_index], row[start_index+1], row[start_index+2], row[start_index+3], row[start_index+4], False)
-    return img.getProcessedFilePath(is_train)
+    val = img.getProcessedFilePath(is_train)
+    all_valid_entries[key] = val
+    return val
 
     
 
