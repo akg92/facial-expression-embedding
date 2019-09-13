@@ -33,7 +33,7 @@ def clean(file_name, is_train):
                         new_rows[-1].append(row[i+1])
                         total_new_rows += 1
                     csv_writer.writerows(new_rows)
-    print('Total new rows {}, Total valid old rows'.format(total_new_rows, total_old_rows))
+    print('Total new rows {}, Total valid old rows {}'.format(total_new_rows, total_old_rows))
 
 
 ## create processed test and train files by removing non-existing files
