@@ -1,6 +1,7 @@
 ## clean the test and train file
 import csv
 from src.config.staticConfig  import StaticConfig
+from src.data.dataRep import Image
 import os
 
 def is_valid(urls, is_train):
@@ -8,6 +9,12 @@ def is_valid(urls, is_train):
         if not os.path.exists(StaticConfig.getImagePath(url, is_train)):
             return False
     return True
+def get_processed_file_name( is_train, row, index):
+    start_index = index*5
+    img = Image(row[start_index], row[start_index+1], row[start_index+2], row[start_index+3], row[start_index+4], False)
+    return img.getProcessedFilePath(is_train)
+
+    
 
 def clean(file_name, is_train):
     total_new_rows = 0
@@ -26,7 +33,11 @@ def clean(file_name, is_train):
                 if( all_file_exist):
                     total_old_rows += 1
                     new_rows = []
-                    common_eles = row[:16]
+                    common_eles = list(row[:16])
+                    common_eles.append(get_processed_file_name(is_train , row, 0))
+                    common_eles.append(get_processed_file_name(is_train , row, 1))
+                    common_eles.append(get_processed_file_name(is_train , row, 2))
+
                     for i in range(16, len(row) , 2):
                         new_rows.append(list(common_eles))
                         new_rows[-1].append(row[i])

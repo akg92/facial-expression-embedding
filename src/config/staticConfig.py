@@ -9,6 +9,13 @@ class StaticConfig:
     _absCsvDir = None 
     _testCSVName = 'faceexp-comparison-data-test-public.csv'
     _trainCSVName = 'faceexp-comparison-data-train-public.csv'
+    
+    # @staticmethod
+    # def is_valid(urls, is_train):
+    #     for url in urls:
+    #         if not os.path.exists(StaticConfig.getImagePath(url, is_train)):
+    #             return False
+    #     return True
 
     @staticmethod
     def getCSVDir():
@@ -68,7 +75,6 @@ class StaticConfig:
     def getImageProcessedDir(train):
         imgDir = StaticConfig.getImageOutDir()
         return os.path.join(imgDir, "train_processed") if train else os.path.join(imgDir, "test_processed")
-
 
 
 
