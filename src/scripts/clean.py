@@ -39,8 +39,8 @@ def clean(file_name, is_train):
 ## create processed test and train files by removing non-existing files
 
                         
-test_file_path = 'data/faceexp-comparison-data-test-public.csv'
-train_file_path = 'data/faceexp-comparison-data-train-public.csv'
+test_file_path = '../../data/faceexp-comparison-data-test-public.csv'
+train_file_path = '../../data/faceexp-comparison-data-train-public.csv'
 
 clean(train_file_path, True)
 clean(test_file_path, True)
