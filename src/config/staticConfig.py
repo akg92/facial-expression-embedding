@@ -76,6 +76,11 @@ class StaticConfig:
         imgDir = StaticConfig.getImageOutDir()
         return os.path.join(imgDir, "train_processed") if train else os.path.join(imgDir, "test_processed")
 
+    @staticmethod
+    def getPretrainedImageFromFile(fileName):
+        os.path.join(StaticConfig.getImageOutDir(), "train_processed", fileName)
+
+
 
 
 
