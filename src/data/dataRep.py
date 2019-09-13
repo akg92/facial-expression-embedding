@@ -11,7 +11,7 @@ import threading
 class Image():
 
     detector = None
-    def __init__(self, url, topLeftCol, bottomRightCol, topLeftRow, bottomRightRow ):
+    def __init__(self, url, topLeftCol, bottomRightCol, topLeftRow, bottomRightRow, rep = True ):
         self.url = url
         self.url = self.url.replace("\"","")
         self.topLeftCol = float(topLeftCol)
@@ -19,8 +19,26 @@ class Image():
         self.topLeftRow = float(topLeftRow)
         self.bottomRightRow = float(bottomRightRow)
         self.width = -1
-        if( not Image.detector):
+        if( rep and not Image.detector):
             Image.detector = detectors.MTCNN()
+
+    ## return the effectie new file name
+    def getProcessedFilePath(self, isTrain):
+        originalFileName = StaticConfig.getImagePath(self.url, isTrain)
+        processedFileNamePrefix = StaticConfig.getImageProcessedPath(self.url, isTrain)
+        npArray = cv2.imread(originalFileName)
+        if(npArray is None):
+            print("Error in reading file ##########################3{}".format(originalFileName))
+            return 
+        width = npArray.shape[1]
+        height = npArray.shape[0]
+        tleftcol = int( self.topLeftCol*width)
+        brightcol = int(self.bottomRightCol*width)
+        topleftrow = int(self.topLeftRow*height)
+        brightrow = int(self.bottomRightRow*height)
+
+        processedFileName = processedFileNamePrefix + "{}_{}_{}_{}.jpg".format(tleftcol, brightcol, topleftrow, brightrow)
+        return processedFileName
 
     def  resizeImage(self, isTrain, counter):
         originalFileName = StaticConfig.getImagePath(self.url, isTrain)
