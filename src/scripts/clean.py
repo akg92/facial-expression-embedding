@@ -3,7 +3,9 @@ import csv
 from src.config.staticConfig  import StaticConfig
 from src.data.dataRep import Image
 import os
-
+from src.limit import limitUsage
+## to avoid accidental  gpu usage
+limitUsage("5,6")
 def is_valid(urls, is_train):
     for url in urls:
         if not os.path.exists(StaticConfig.getImagePath(url, is_train)):
