@@ -13,7 +13,7 @@ def clean(file_name, is_train):
     total_new_rows = 0
     total_old_rows = 0
     img_indexes = [0, 5, 10]
-    fname = os.path(file_name).basename
+    fname = os.path.basename(file_name)
     processed_file = os.path.join( os.path.dirname(file_name),'processed_'+fname) 
     with open(file_name) as f:
         with open(processed_file, 'w') as wfile:
