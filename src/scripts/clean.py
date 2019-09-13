@@ -4,8 +4,8 @@ from src.config.staticConfig  import StaticConfig
 import os
 
 def is_valid(urls, is_train):
-    for f in files:
-        if not os.path.exists(StaticConfig.getImagePath(urls), is_train):
+    for url in urls:
+        if not os.path.exists(StaticConfig.getImagePath(url), is_train):
             return False
     return True
 
