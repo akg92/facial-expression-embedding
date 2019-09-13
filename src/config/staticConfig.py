@@ -78,7 +78,7 @@ class StaticConfig:
 
     @staticmethod
     def getPretrainedImageFromFile(fileName):
-        os.path.join(StaticConfig.getImageOutDir(), "train_processed", fileName)
+        return os.path.join(StaticConfig.getImageOutDir(), "train_processed", fileName)
 
 
 
