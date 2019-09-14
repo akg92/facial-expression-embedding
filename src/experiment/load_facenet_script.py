@@ -91,17 +91,24 @@ def data_generator(train_x, train_y, steps = 100, batch_size = 48):
     
     cur_batch = 0
     with  ThreadPoolExecutor(max_workers= 10) as pool:
+        folders = ['./temp/train_batch_backup', './temp/train_batch_main']
+        f_i = 0
+        main_folder = folders[0]
+        backup_folder = folders[1]
         while True:
             if(cur_batch == 0):
-                if(os.path.exists('./temp/train_batch_backup')):
-                    shutil.rmtree('./temp/train_batch_main')
-                    os.rename('./temp/train_batch_backup', './temp/train_batch_main')
-                    os.mkdir('./temp/train_batch_backup')
+                f_i = (f_i+ 1)%2
+                main_folder = folders[f_i]
+                backup_folder = folders[(f_i+1)%2]
+                if(os.path.exists(backup_folder)):
+                    shutil.rmtree(backup_folder)
+                    #os.rename('./temp/train_batch_backup', './temp/train_batch_main')
+                    os.mkdir(backup_folder)
                 else:
                     
                     try:
-                        os.mkdir('./temp/train_batch_backup')
-                        os.mkdir('./temp/train_batch_main')
+                        os.mkdir(backup_folder)
+                        os.mkdir(main_folder)
                     except Exception as  e:
                         #print(e)
                         #print('error in create folder')
@@ -110,7 +117,7 @@ def data_generator(train_x, train_y, steps = 100, batch_size = 48):
                     #data_generator_threaded(train_x, train_y, cur_batch, 'train_batch_main', batch_size)
                     with  ThreadPoolExecutor(max_workers= 10) as pool_t:
                         for i in range(steps):
-                            future = pool_t.submit(data_generator_threaded, train_x, train_y, i, './temp/train_batch_main', batch_size)
+                            future = pool_t.submit(data_generator_threaded, train_x, train_y, i, main_folder, batch_size)
                             #print(future.result())
                             #data_generator_threaded(train_x, train_y, i, 'train_batch_main', batch_size)
                         pool_t.shutdown(True)
@@ -119,11 +126,11 @@ def data_generator(train_x, train_y, steps = 100, batch_size = 48):
                 
                 
                 for i in range(steps):
-                    pool.submit(data_generator_threaded, train_x, train_y, i, './temp/train_batch_backup', batch_size)
+                    pool.submit(data_generator_threaded, train_x, train_y, i, backup_folder, batch_size)
                     #data_generator_threaded(train_x, train_y, i, 'train_batch_backup', batch_size)
                     #pool.shutdown(True)
                     
-            batch_file_name = os.path.join('./temp/train_batch_main', 'batch_'+str(cur_batch)+'.npz')
+            batch_file_name = os.path.join(main_folder, 'batch_'+str(cur_batch)+'.npz')
             while(not os.path.exists(batch_file_name)):
                 pass
             npzfile = np.load(batch_file_name)
