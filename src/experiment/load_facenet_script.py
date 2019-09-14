@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[ ]:
+# In[16]:
 
 
 import sys
@@ -12,33 +12,33 @@ from src.limit import limitUsage
 limitUsage("5")
 
 
-# In[ ]:
+# In[17]:
 
 
 modelFile = '../model/keras/model/facenet_keras.h5'
 # faceNetModel = load_model(modelFile)
 
 
-# In[ ]:
+# In[18]:
 
 
 #faceNetModel.summary()
 
 
-# In[ ]:
+# In[19]:
 
 
 facenet_model = load_model(modelFile)
 
 
-# In[ ]:
+# In[20]:
 
 
 #!pip install git+https://www.github.com/keras-team/keras-contrib.git
-#get_ipython().system('pwd')
+#!pwd
 
 
-# In[ ]:
+# In[42]:
 
 
 import pandas as pd
@@ -92,15 +92,15 @@ def data_generator(train_x, train_y, steps = 100, batch_size = 48):
     cur_batch = 0
     while True:
         if(cur_batch == 0):
-            if(os.path.exists('train_batch_backup')):
-                shutil.rmtree('train_batch_main')
-                os.rename('train_batch_backup', 'train_batch_main')
-                os.mkdir('train_batch_backup')
+            if(os.path.exists('./temp/train_batch_backup')):
+                shutil.rmtree('./temp/train_batch_main')
+                os.rename('./temp/train_batch_backup', './temp/train_batch_main')
+                os.mkdir('./temp/train_batch_backup')
             else:
                 
                 try:
-                    os.mkdir('train_batch_backup')
-                    os.mkdir('train_batch_main')
+                    os.mkdir('./temp/train_batch_backup')
+                    os.mkdir('./temp/train_batch_main')
                 except Exception as  e:
                     #print(e)
                     #print('error in create folder')
@@ -109,7 +109,7 @@ def data_generator(train_x, train_y, steps = 100, batch_size = 48):
                 #data_generator_threaded(train_x, train_y, cur_batch, 'train_batch_main', batch_size)
                 with  ThreadPoolExecutor(max_workers= 10) as pool_t:
                     for i in range(steps):
-                        future = pool_t.submit(data_generator_threaded, train_x, train_y, i, 'train_batch_main', batch_size)
+                        future = pool_t.submit(data_generator_threaded, train_x, train_y, i, './temp/train_batch_main', batch_size)
                         #print(future.result())
                         #data_generator_threaded(train_x, train_y, i, 'train_batch_main', batch_size)
                     pool_t.shutdown(True)
@@ -118,15 +118,16 @@ def data_generator(train_x, train_y, steps = 100, batch_size = 48):
             
             with  ThreadPoolExecutor(max_workers= 10) as pool:
                 for i in range(steps):
-                    pool.submit(data_generator_threaded, train_x, train_y, i, 'train_batch_backup', batch_size)
+                    pool.submit(data_generator_threaded, train_x, train_y, i, './temp/train_batch_backup', batch_size)
                     #data_generator_threaded(train_x, train_y, i, 'train_batch_backup', batch_size)
                 pool.shutdown(True)
                 
-        batch_file_name = os.path.join('train_batch_main', 'batch_'+str(cur_batch)+'.npz')
+        batch_file_name = os.path.join('./temp/train_batch_main', 'batch_'+str(cur_batch)+'.npz')
         while(not os.path.exists(batch_file_name)):
             pass
         npzfile = np.load(batch_file_name)
         cur_batch = (cur_batch+1) % steps
+        #print('{}:{}:{}'.format(npzfile['x'][0].shape,npzfile['x'][1].shape, npzfile['x'][2].shape))
         yield [npzfile['x'][0], npzfile['x'][1], npzfile['x'][2]],npzfile['y'] 
             
                 
@@ -161,7 +162,7 @@ def validation_generator(x, y, batch_size = 48):
             cur_index = (cur_index+1)%size
             
         batch_x = [[] for x in range(3)]
-        batch_y = train_y.iloc[indexes,-1].values
+        batch_y = train_y.iloc[indexes].values
         batch_y = np.reshape(batch_y, (-1,1))
         ## fetch images. image indexes are 
         for row in train_x.iloc[indexes].values:
@@ -173,6 +174,7 @@ def validation_generator(x, y, batch_size = 48):
                 batch_x[i].append(cv2.imread(file))
                 i+=1
             #batch_x.append(imgs)
+        #print('{}:{}:{}'.format(npzfile['x'][0].shape,npzfile['x'][1].shape, npzfile['x'][2].shape))
         yield [np.stack(batch_x[0], axis =0), np.stack(batch_x[1], axis =0), np.stack(batch_x[2], axis =0)], batch_y
     
             
@@ -181,7 +183,7 @@ def validation_generator(x, y, batch_size = 48):
     
 
 
-# In[ ]:
+# In[22]:
 
 
 #print(train_x.iloc[[1,2]])
@@ -190,33 +192,59 @@ def validation_generator(x, y, batch_size = 48):
 #print(t2)
 
 
-# In[ ]:
+# In[49]:
 
 
 from keras_contrib.applications import DenseNet
 import keras.backend as K
 import keras 
 from keras.models import Model
-from keras.layers import AveragePooling2D, Dense, Flatten,BatchNormalization, Input, Lambda, Concatenate
+from keras.layers import AveragePooling2D, Dense, Flatten,BatchNormalization, Input, Lambda, Concatenate, concatenate
 import keras.optimizers as optimizer
 
 def loss_fun(label, pred, delta = 0.001):
     ## label is of the form [first_pred, second_pred, last_pred]
     #i label means the i is different from the rest of the pair
-    x,y,z  = pred[0], pred[1], pred[2]
-    
+    #print('Hellooooooooooooooooooooo')
+    x,y,z  = pred[:,0], pred[:,1], pred[:,2]
+    n = pred.shape[0]
+    #print('loss shape {} {} {} '.format(x.shape, y.shape, z.shape))
     ## y and z is similar
-    if label == 1:
-        return K.maximum(0.0, K.square(y-z) - K.square(y-x) + delta) + K.maximum(0.0, K.square(y-z) - K.square(z- x) + delta) 
-    elif label == 2:
-        return K.maximum(0.0, K.square(x-z) - K.square( x- y) + delta) + K.maximum(0.0, K.square(x - z) - K.square(y- z) + delta)
+    l_1 = K.maximum(0.0, K.square(y-z) - K.square(y-x) + delta) + K.maximum(0.0, K.square(y-z) - K.square(z- x) + delta)
+    l_2 = K.maximum(0.0, K.square(x-z) - K.square( x- y) + delta) + K.maximum(0.0, K.square(x - z) - K.square(y- z) + delta)
+    l_3  = K.maximum(0.0, K.square(x- y) - K.square( x -z) + delta) + K.maximum(0.0, K.square(x- y) - K.square( y- z ) + delta)
     
-    else:
-        return K.maximum(0.0, K.square(x- y) - K.square( x -z) + delta) + K.maximum(0.0, K.square(x- y) - K.square( y- z ) + delta)
+    l_1_eq = K.cast(K.equal(label, 1),'float32')
+    l_2_eq = K.cast(K.equal(label, 2), 'float32')
+    l_3_eq = K.cast(K.equal(label, 3), 'float32')
+    
+    return K.mean(K.sum([l_1*l_1_eq , l_2 * l_2_eq*l_2 , l_3_eq * l_3], axis = 1 ))
+    
+#     if label == 1:
+#         return K.maximum(0.0, K.square(y-z) - K.square(y-x) + delta) + K.maximum(0.0, K.square(y-z) - K.square(z- x) + delta) 
+#     elif label == 2:
+#         return K.maximum(0.0, K.square(x-z) - K.square( x- y) + delta) + K.maximum(0.0, K.square(x - z) - K.square(y- z) + delta)
+    
+#     else:
+#         return K.maximum(0.0, K.square(x- y) - K.square( x -z) + delta) + K.maximum(0.0, K.square(x- y) - K.square( y- z ) + delta)
     
         
-def accuracy_c(y_true, y_pred):
-    s = loss_fun(K.cast(y_true, 'int32'), y_pred)
+def accuracy_c(label, pred, delta = 0.0):
+        #print('Hellooooooooooooooooooooo')
+    x,y,z  = pred[:,0], pred[:,1], pred[:,2]
+    n = pred.shape[0]
+    #print('loss shape {} {} {} '.format(x.shape, y.shape, z.shape))
+    ## y and z is similar
+    l_1 = K.maximum(0.0, K.square(y-z) - K.square(y-x) + delta) + K.maximum(0.0, K.square(y-z) - K.square(z- x) + delta)
+    l_2 = K.maximum(0.0, K.square(x-z) - K.square( x- y) + delta) + K.maximum(0.0, K.square(x - z) - K.square(y- z) + delta)
+    l_3  = K.maximum(0.0, K.square(x- y) - K.square( x -z) + delta) + K.maximum(0.0, K.square(x- y) - K.square( y- z ) + delta)
+    
+    l_1_eq = K.cast(K.equal(label, 1),'float32')
+    l_2_eq = K.cast(K.equal(label, 2), 'float32')
+    l_3_eq = K.cast(K.equal(label, 3), 'float32')
+    s = K.sum([l_1*l_1_eq , l_2 * l_2_eq*l_2 , l_3_eq * l_3], axis = 1 )
+    
+    #s = loss_fun(K.cast(y_true, 'int32'), y_pred)
     return K.equal(s, 0.0)
         
         
@@ -249,7 +277,7 @@ def create_new_model(input_shape):
     x = Flatten(name  = 'cutome_flatten_2')(x)
     x = Dense(512, activation='relu', name = 'custome_dense_dense_3')(x)
     x = BatchNormalization(name='cutome_batch_normalization_4')(x)
-    x = Dense(16, activation='relu', name = 'custome_dense_5')(x)
+    x = Dense(20, activation='relu', name = 'custome_dense_5')(x)
     #x = Dense(1, activation='relu', name = 'custome_dense_output_1')(x)
     x = Lambda(lambda  x: K.l2_normalize(x,axis=1), name = 'custome_l2_normalize_6')(x)
     #fin = d(inter_layer.output)
@@ -263,7 +291,8 @@ def create_new_model(input_shape):
     l2 = model(input_2)
     l3 = model(input_3)
     
-    x = Concatenate()([l1, l2, l3])
+    x = concatenate([l1, l2, l3])
+    print(x.shape)
     final_model = Model(inputs=[input_1, input_2, input_3], outputs=x)
     
     
@@ -273,56 +302,64 @@ def create_new_model(input_shape):
     
 
 
-# In[ ]:
+# In[50]:
 
 
 embedding_model = create_new_model((160,160,3))
 
 
-# In[ ]:
+# In[51]:
 
 
 embedding_model.summary()
 
 
-# In[ ]:
+# In[52]:
 
 
 # example of loading an image with the Keras API
-import numpy as np
-from keras.preprocessing.image import load_img, img_to_array
-test_img = img_to_array(load_img('test.jpg'))
-#test_imgs = (test_img, test_img, test_img)
-inp = np.expand_dims(test_img, axis = 0)
-embedding_model.predict([inp, inp, inp])
+# import numpy as np
+# from keras.preprocessing.image import load_img, img_to_array
+# test_img = img_to_array(load_img('test.jpg'))
+# #test_imgs = (test_img, test_img, test_img)
+# inp = np.expand_dims(test_img, axis = 0)
+# embedding_model.predict([inp, inp, inp])
 
 
-# In[ ]:
+# In[53]:
 
 
 embedding_model.input
 
 
-# In[ ]:
+# In[54]:
 
 
 train_x, train_y, val_x, val_y = get_train_data('../../data/processed_faceexp-comparison-data-train-public.csv')
 
 
-# In[ ]:
+# In[58]:
 
 
 from keras.callbacks import ModelCheckpoint
-batch_size = 64
-filepath="weights-improvement-{epoch:02d}-{val_acc:.2f}.hdf5"
-checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+batch_size = 512
+filepath="weights-improvement-{epoch:02d}-{val_accuracy_c:.2f}.hdf5"
+checkpoint = ModelCheckpoint(filepath, save_best_only=False)
 callbacks_list = [checkpoint]
-samples_per_epoch= 10000
-embedding_model.fit_generator(data_generator(train_x, train_y, samples_per_epoch, batch_size), validation_data = validation_generator(val_x, val_y,batch_size), validation_steps = 100 , samples_per_epoch= samples_per_epoch,callbacks=callbacks_list, nb_epoch=100)
+samples_per_epoch= 1000
+history = embedding_model.fit_generator(data_generator(train_x, train_y, samples_per_epoch, batch_size), validation_data = validation_generator(val_x, val_y,batch_size), validation_steps = 1 , samples_per_epoch= samples_per_epoch,callbacks=callbacks_list, nb_epoch=1000)
 
 
 # In[ ]:
 
 
 facenet_model.summary()
+
+
+# In[ ]:
+
+
+import pickle
+with open('trainHistoryDict', 'wb') as file_pi:
+    pickle.dump(history.history, file_pi)
 
