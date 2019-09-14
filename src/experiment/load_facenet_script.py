@@ -115,12 +115,12 @@ def data_generator(train_x, train_y, steps = 100, batch_size = 48):
                         pass
                         
                     #data_generator_threaded(train_x, train_y, cur_batch, 'train_batch_main', batch_size)
-                    with  ThreadPoolExecutor(max_workers= 10) as pool_t:
-                        for i in range(steps):
-                            future = pool_t.submit(data_generator_threaded, train_x, train_y, i, main_folder, batch_size)
+                    #with  ThreadPoolExecutor(max_workers= 10) as pool_t:
+                    for i in range(steps):
+                        future = pool.submit(data_generator_threaded, train_x, train_y, i, main_folder, batch_size)
                             #print(future.result())
                             #data_generator_threaded(train_x, train_y, i, 'train_batch_main', batch_size)
-                        pool_t.shutdown(True)
+                        #pool_t.shutdown(True)
                         #print(pool_t.result())
                 
                 
