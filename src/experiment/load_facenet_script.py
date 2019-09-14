@@ -150,7 +150,7 @@ def get_minimum_index(folder):
             if(file_index == -1):
                 file_index = cur_file_index
             else:
-                file_index = max(file_index, cur_file_index)
+                file_index = min(file_index, cur_file_index)
     return file_index if file_index != -1 else 0
 import time
 def process_data_creator(train_x, train_y, temp_folder, steps = 100, batch_size =64 ):
