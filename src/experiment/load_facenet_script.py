@@ -184,6 +184,7 @@ def data_generator_2(train_x, train_y, steps = 100, batch_size = 48):
     backup_folder = folders[0]
     process = Process(target = process_data_creator, args= (train_x, train_y, main_folder, steps, batch_size))
     process.start()
+    time.sleep(120)
     while True:        
         batch_file_name = os.path.join(main_folder, 'batch_'+str(cur_batch)+'.npz')
         while(not os.path.exists(batch_file_name)):
