@@ -154,7 +154,11 @@ def get_minimum_index(folder):
     return file_index if file_index != -1 else 0
 import time
 def process_data_creator(train_x, train_y, temp_folder, steps = 100, batch_size =64 ):
-    shutil.rmtree(temp_folder)
+    try:
+        shutil.rmtree(temp_folder)
+    except:
+        ## incase of first time
+        pass
     os.mkdir(temp_folder)
     cur_iteration = 0
     while True:
