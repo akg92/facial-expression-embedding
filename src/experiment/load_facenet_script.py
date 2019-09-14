@@ -138,7 +138,58 @@ def data_generator(train_x, train_y, steps = 100, batch_size = 48):
             #print('{}:{}:{}'.format(npzfile['x'][0].shape,npzfile['x'][1].shape, npzfile['x'][2].shape))
             yield [npzfile['x'][0], npzfile['x'][1], npzfile['x'][2]],npzfile['y'] 
                 
-                
+LAST_USED = 0
+
+def get_minimum_index(folder):
+    file_index =  -1
+    for file in os.listdir(folder):
+        file_location = os.path.join(folder, file)
+        if os.path.isfile(file_location):
+            file_name_only = file[:file.index('.npz')]
+            cur_file_index = int(file_name_only.split('_')[1])
+            if(file_index == -1):
+                file_index = cur_file_index
+            else:
+                file_index = max(file_index, cur_file_index)
+    return file_index if file_index != -1 else 0
+import time
+def process_data_creator(train_x, train_y, temp_folder, steps = 100, batch_size =64 ):
+    shutil.rmtree(temp_folder)
+    os.mkdir(temp_folder)
+    cur_iteration = 0
+    while True:
+        min_index = get_minimum_index(temp_folder)
+        ## sleep
+        if min_index + 2000 < cur_iteration:
+            time.sleep(30)
+            continue
+        ## create 200 files
+        with  ThreadPoolExecutor(max_workers= 5) as pool:
+            for i in range(200):
+                future = pool.submit(data_generator_threaded, train_x, train_y, cur_iteration, temp_folder, batch_size)
+                cur_iteration += 1
+            pool.shutdown(wait = True)   
+            
+def data_generator_2(train_x, train_y, steps = 100, batch_size = 48):
+    
+    cur_batch = 0
+    with  ProcessPoolExecutor(max_workers= 10) as pool:
+        folders = ['./temp/train_batch_backup', './temp/train_batch_main']
+        f_i = 0
+        main_folder = folders[1]
+        backup_folder = folders[0]
+        pool.submit(process_data_creator, train_x, train_y, main_folder, steps, batch_size)
+        while True:        
+            batch_file_name = os.path.join(main_folder, 'batch_'+str(cur_batch)+'.npz')
+            while(not os.path.exists(batch_file_name)):
+                pass
+            npzfile = np.load(batch_file_name)
+            cur_batch = cur_batch + 1  
+            ## remove used file
+            os.remove(batch_file_name)
+            #print('{}:{}:{}'.format(npzfile['x'][0].shape,npzfile['x'][1].shape, npzfile['x'][2].shape))
+            yield [npzfile['x'][0], npzfile['x'][1], npzfile['x'][2]],npzfile['y'] 
+
     
 # def data_generator(train_x, train_y, batch_size = 48):
 #     row_count = train_x.shape[0]
@@ -355,7 +406,7 @@ filepath="weights-improvement-{epoch:02d}-{val_accuracy_c:.2f}.hdf5"
 checkpoint = ModelCheckpoint(filepath, save_best_only=False)
 callbacks_list = [checkpoint]
 samples_per_epoch= 1000
-history = embedding_model.fit_generator(data_generator(train_x, train_y, samples_per_epoch, batch_size), validation_data = validation_generator(val_x, val_y,batch_size), validation_steps = 1 , samples_per_epoch= samples_per_epoch,callbacks=callbacks_list, nb_epoch=1000)
+history = embedding_model.fit_generator(data_generator_2(train_x, train_y, samples_per_epoch, batch_size), validation_data = validation_generator(val_x, val_y,batch_size), validation_steps = 1 , samples_per_epoch= samples_per_epoch,callbacks=callbacks_list, nb_epoch=100)
 
 
 # In[ ]:
