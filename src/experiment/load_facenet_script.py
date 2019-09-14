@@ -188,7 +188,7 @@ def data_generator_2(train_x, train_y, steps = 100, batch_size = 48):
         batch_file_name = os.path.join(main_folder, 'batch_'+str(cur_batch)+'.npz')
         while(not os.path.exists(batch_file_name)):
             pass
-        npzfile = np.load(batch_file_name)
+        npzfile = np.load(batch_file_name, allow_pickle= True)
         cur_batch = cur_batch + 1  
         ## remove used file
         os.remove(batch_file_name)
