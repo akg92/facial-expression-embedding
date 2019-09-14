@@ -173,28 +173,29 @@ def process_data_creator(train_x, train_y, temp_folder, steps = 100, batch_size 
                 future = pool.submit(data_generator_threaded, train_x, train_y, cur_iteration, temp_folder, batch_size)
                 cur_iteration += 1
             pool.shutdown(wait = True)   
-            
+from multiprocessing import Process        
 def data_generator_2(train_x, train_y, steps = 100, batch_size = 48):
     
     cur_batch = 0
-    with  ProcessPoolExecutor(max_workers= 10) as pool:
-        folders = ['./temp/train_batch_backup', './temp/train_batch_main']
-        f_i = 0
-        main_folder = folders[1]
-        backup_folder = folders[0]
-        pool.submit(process_data_creator, train_x, train_y, main_folder, steps, batch_size)
-        while True:        
-            batch_file_name = os.path.join(main_folder, 'batch_'+str(cur_batch)+'.npz')
-            while(not os.path.exists(batch_file_name)):
-                pass
-            npzfile = np.load(batch_file_name)
-            cur_batch = cur_batch + 1  
-            ## remove used file
-            os.remove(batch_file_name)
-            #print('{}:{}:{}'.format(npzfile['x'][0].shape,npzfile['x'][1].shape, npzfile['x'][2].shape))
-            yield [npzfile['x'][0], npzfile['x'][1], npzfile['x'][2]],npzfile['y'] 
+    # with  ProcessPoolExecutor(max_workers= 10) as pool:
+    folders = ['./temp/train_batch_backup', './temp/train_batch_main']
+    f_i = 0
+    main_folder = folders[1]
+    backup_folder = folders[0]
+    process = Process(target = process_data_creator, args= (train_x, train_y, main_folder, steps, batch_size))
+    process.start()
+    while True:        
+        batch_file_name = os.path.join(main_folder, 'batch_'+str(cur_batch)+'.npz')
+        while(not os.path.exists(batch_file_name)):
+            pass
+        npzfile = np.load(batch_file_name)
+        cur_batch = cur_batch + 1  
+        ## remove used file
+        os.remove(batch_file_name)
+        #print('{}:{}:{}'.format(npzfile['x'][0].shape,npzfile['x'][1].shape, npzfile['x'][2].shape))
+        yield [npzfile['x'][0], npzfile['x'][1], npzfile['x'][2]],npzfile['y'] 
 
-    
+    process.join()
 # def data_generator(train_x, train_y, batch_size = 48):
 #     row_count = train_x.shape[0]
 #     while True:
