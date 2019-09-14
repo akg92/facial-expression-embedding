@@ -90,46 +90,47 @@ def data_generator_threaded(train_x, train_y, index, folder, batch_size):
 def data_generator(train_x, train_y, steps = 100, batch_size = 48):
     
     cur_batch = 0
-    while True:
-        if(cur_batch == 0):
-            if(os.path.exists('./temp/train_batch_backup')):
-                shutil.rmtree('./temp/train_batch_main')
-                os.rename('./temp/train_batch_backup', './temp/train_batch_main')
-                os.mkdir('./temp/train_batch_backup')
-            else:
-                
-                try:
+    with  ThreadPoolExecutor(max_workers= 10) as pool:
+        while True:
+            if(cur_batch == 0):
+                if(os.path.exists('./temp/train_batch_backup')):
+                    shutil.rmtree('./temp/train_batch_main')
+                    os.rename('./temp/train_batch_backup', './temp/train_batch_main')
                     os.mkdir('./temp/train_batch_backup')
-                    os.mkdir('./temp/train_batch_main')
-                except Exception as  e:
-                    #print(e)
-                    #print('error in create folder')
-                    pass
+                else:
                     
-                #data_generator_threaded(train_x, train_y, cur_batch, 'train_batch_main', batch_size)
-                with  ThreadPoolExecutor(max_workers= 10) as pool_t:
-                    for i in range(steps):
-                        future = pool_t.submit(data_generator_threaded, train_x, train_y, i, './temp/train_batch_main', batch_size)
-                        #print(future.result())
-                        #data_generator_threaded(train_x, train_y, i, 'train_batch_main', batch_size)
-                    pool_t.shutdown(True)
-                    #print(pool_t.result())
-            
-            
-            with  ThreadPoolExecutor(max_workers= 10) as pool:
+                    try:
+                        os.mkdir('./temp/train_batch_backup')
+                        os.mkdir('./temp/train_batch_main')
+                    except Exception as  e:
+                        #print(e)
+                        #print('error in create folder')
+                        pass
+                        
+                    #data_generator_threaded(train_x, train_y, cur_batch, 'train_batch_main', batch_size)
+                    with  ThreadPoolExecutor(max_workers= 10) as pool_t:
+                        for i in range(steps):
+                            future = pool_t.submit(data_generator_threaded, train_x, train_y, i, './temp/train_batch_main', batch_size)
+                            #print(future.result())
+                            #data_generator_threaded(train_x, train_y, i, 'train_batch_main', batch_size)
+                        pool_t.shutdown(True)
+                        #print(pool_t.result())
+                
+                
+                
                 for i in range(steps):
                     pool.submit(data_generator_threaded, train_x, train_y, i, './temp/train_batch_backup', batch_size)
                     #data_generator_threaded(train_x, train_y, i, 'train_batch_backup', batch_size)
-                pool.shutdown(True)
+                    #pool.shutdown(True)
+                    
+            batch_file_name = os.path.join('./temp/train_batch_main', 'batch_'+str(cur_batch)+'.npz')
+            while(not os.path.exists(batch_file_name)):
+                pass
+            npzfile = np.load(batch_file_name)
+            cur_batch = (cur_batch+1) % steps
+            #print('{}:{}:{}'.format(npzfile['x'][0].shape,npzfile['x'][1].shape, npzfile['x'][2].shape))
+            yield [npzfile['x'][0], npzfile['x'][1], npzfile['x'][2]],npzfile['y'] 
                 
-        batch_file_name = os.path.join('./temp/train_batch_main', 'batch_'+str(cur_batch)+'.npz')
-        while(not os.path.exists(batch_file_name)):
-            pass
-        npzfile = np.load(batch_file_name)
-        cur_batch = (cur_batch+1) % steps
-        #print('{}:{}:{}'.format(npzfile['x'][0].shape,npzfile['x'][1].shape, npzfile['x'][2].shape))
-        yield [npzfile['x'][0], npzfile['x'][1], npzfile['x'][2]],npzfile['y'] 
-            
                 
     
 # def data_generator(train_x, train_y, batch_size = 48):
