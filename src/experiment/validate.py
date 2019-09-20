@@ -12,7 +12,7 @@ from src.limit import limitUsage
 limitUsage("3")
 
 
-# In[19]:
+# In[12]:
 
 
 import pandas as pd
@@ -37,13 +37,13 @@ def get_train_data(train_file):
 
 
 
-# In[20]:
+# In[13]:
 
 
 train_x, train_y, val_x, val_y = get_train_data('../../data/processed_faceexp-comparison-data-train-public.csv')
 
 
-# In[23]:
+# In[14]:
 
 
 from keras_contrib.applications import DenseNet
@@ -99,6 +99,9 @@ def accuracy_c(label, pred, delta = 0.0):
 
 
 def data_generator_threaded(train_x, train_y, index, folder, batch_size):
+    file_name = os.path.join(folder, 'batch_'+str(index))
+    if(os.path.exists(file_name)):
+        return 
     row_count = train_x.shape[0]
 #     indexes = np.random.randint( 0, row_count, size = batch_size )
     indexes = [x for x in range(index*batch_size, min(train_x.shape[0], (index+1)*batch_size))]
@@ -121,7 +124,7 @@ def data_generator_threaded(train_x, train_y, index, folder, batch_size):
 
 
 import time
-def process_data_creator(train_x, train_y,temp_folder, steps = 100, batch_size =512 ):
+def process_data_creator(train_x, train_y,temp_folder, steps = 100, batch_size =128 ):
     try:
         os.mkdir(temp_folder)
     except:
@@ -142,7 +145,7 @@ def process_data_creator(train_x, train_y,temp_folder, steps = 100, batch_size =
         time.sleep(60)
     
 from multiprocessing import Process        
-def data_generator_2(train_x, train_y, steps = 100, batch_size = 512):
+def data_generator_2(train_x, train_y, steps = 100, batch_size = 128):
     
     cur_batch = 0
     # with  ProcessPoolExecutor(max_workers= 10) as pool:
@@ -161,6 +164,7 @@ def data_generator_2(train_x, train_y, steps = 100, batch_size = 512):
             pass
         npzfile = np.load(batch_file_name, allow_pickle= True)
         cur_batch = cur_batch + 1  
+        print(batch_file_name)
         ## remove used file
         #os.remove(batch_file_name)
         #print("helloooooooooooo")
@@ -171,19 +175,7 @@ def data_generator_2(train_x, train_y, steps = 100, batch_size = 512):
     
 
 
-# In[25]:
-
-
-gn = data_generator_2(val_x, val_y)
-
-
-# In[26]:
-
-
-next(gn)
-
-
-# In[32]:
+# In[15]:
 
 
 
@@ -225,7 +217,7 @@ def run_validation(val_x, val_y, model_file):
 #             #print(np.stack(batch_x[0]).shape)
 
     
-    return feb_model.evaluate_generator(data_generator_2(val_x, val_y), steps = int(val_x.shape[0]/512))
+    return feb_model.evaluate_generator(data_generator_2(val_x, val_y), steps = int(val_x.shape[0]/128))
 #     level += 1
 #         loss += result[-1][0]
 #         accuracy += result[-1][1]
@@ -253,7 +245,7 @@ loss, accuracy = run_validation(val_x, val_y, 'weights-improvement-07-0.97.hdf5'
 #print('Loss = {}, Accuracy = {}'.format(loss, accuracy))
 
 
-# In[13]:
+# In[ ]:
 
 
 val_x.shape
@@ -279,4 +271,10 @@ def calc_all():
                 pass
             
 calc_all()
+
+
+# In[10]:
+
+
+val_x.shape
 
