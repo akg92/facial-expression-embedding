@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[21]:
 
 
 import sys
@@ -12,7 +12,7 @@ from src.limit import limitUsage
 limitUsage("3")
 
 
-# In[2]:
+# In[22]:
 
 
 import pandas as pd
@@ -35,13 +35,15 @@ def get_train_data(train_file):
     return df_train, label_train, df_test, label_test
 
 
-# In[3]:
+
+
+# In[23]:
 
 
 train_x, train_y, val_x, val_y = get_train_data('../../data/processed_faceexp-comparison-data-train-public.csv')
 
 
-# In[4]:
+# In[27]:
 
 
 from keras_contrib.applications import DenseNet
@@ -92,12 +94,85 @@ def accuracy_c(label, pred, delta = 0.0):
     
     #s = loss_fun(K.cast(y_true, 'int32'), y_pred)
     return K.equal(s, 0.0)
-        
-        
+
+
+
+def data_generator_threaded(train_x, train_y, index, folder, batch_size):
+    row_count = train_x.shape[0]
+#     indexes = np.random.randint( 0, row_count, size = batch_size )
+    indexes = [x for x in range(index*batch_size, min(train_x.shape[0], (index+1)*batch_size))]
+    #print(indexes)
+    batch_x = [[] for x in range(3)]
+    batch_y = train_y.iloc[indexes].values
+    batch_y = np.reshape(batch_y, (-1,1))
+    for row in train_x.iloc[indexes].values:
+        #imgs = []
+        i = 0
+        for file in row.tolist()[16:19]:
+            file = StaticConfig.getPretrainedImageFromFile(file)
+            #print(file)
+            batch_x[i].append(cv2.imread(file))
+            i+=1
+            #batch_x.append(imgs)
+        #print(row[16])
+    file_name = os.path.join(folder, 'batch_'+str(index))
+    np.savez( file_name, x =[np.stack(batch_x[0], axis =0), np.stack(batch_x[1], axis =0), np.stack(batch_x[2], axis =0)], y = batch_y)
+    return 1
     
 
 
-# In[25]:
+import time
+def process_data_creator(train_x, train_y,temp_folder, steps = 100, batch_size =512 ):
+    try:
+        os.mkdir(temp_folder)
+    except:
+        ## incase of first time
+        pass
+#     os.mkdir(temp_folder)
+    #cur_iteration = 0
+    max_iteration = int(train_x.shape[0]/batch_size)
+    for cur_iteration in range(max_iteration):
+        ## create 200 files
+        with  ThreadPoolExecutor(max_workers= 5) as pool:
+            for i in range(200):
+                if(max_iteration == max_iteration):
+                    break
+                    future = pool.submit(data_generator_threaded, train_x, train_y, cur_iteration, temp_folder, batch_size)
+                    cur_iteration += 1
+            pool.shutdown(wait = True)  
+        time.sleep(60)
+    
+from multiprocessing import Process        
+def data_generator_2(train_x, train_y, steps = 100, batch_size = 512):
+    
+    cur_batch = 0
+    # with  ProcessPoolExecutor(max_workers= 10) as pool:
+    folders = ['./temp/val_batch_backup', './temp/val_batch_main']
+    f_i = 0
+    main_folder = folders[1]
+    backup_folder = folders[0]
+    process = Process(target = process_data_creator, args= (train_x, train_y, main_folder, steps, batch_size))
+    process.start()
+    time.sleep(60)
+    #print("hellooooooooooo1")
+    
+    while True:        
+        batch_file_name = os.path.join(main_folder, 'batch_'+str(cur_batch)+'.npz')
+        while(not os.path.exists(batch_file_name)):
+            pass
+        npzfile = np.load(batch_file_name, allow_pickle= True)
+        cur_batch = cur_batch + 1  
+        ## remove used file
+        #os.remove(batch_file_name)
+        #print("helloooooooooooo")
+        #print('{}:{}:{}'.format(npzfile['x'][0].shape,npzfile['x'][1].shape, npzfile['x'][2].shape))
+        yield ([npzfile['x'][0], npzfile['x'][1], npzfile['x'][2]],npzfile['y'] )
+
+    process.join()
+    
+
+
+# In[32]:
 
 
 
@@ -118,55 +193,57 @@ def run_validation(val_x, val_y, model_file):
     
     
     ## load data
-    inds = split_indexes(val_x)
-    result = []
-    print("Started execution")
-    loss = 0
-    accuracy = 0
-    level = 0
-    for start, end in inds:
-        val_xx = val_x[start:end]
-        val_yy = val_y[start:end]
-        batch_x = [[] for x in range(3)]
-        for row in val_xx.values:
-            #imgs = []
-            i = 0
-            #print(row.shape)
-            for file in row.tolist()[16:19]:
-                file = StaticConfig.getPretrainedImageFromFile(file)
-                #print(file)
-                batch_x[i].append(cv2.imread(file))
-                i+=1
-            #print(np.stack(batch_x[0]).shape)
-        result.append(feb_model.evaluate(x = [ np.stack(batch_x[0], axis =0), np.stack(batch_x[1], axis =0), np.stack(batch_x[2], axis =0) ], y = val_yy.values))
-        level += 1
-        loss += result[-1][0]
-        accuracy += result[-1][1]
-        #print(' Loss = {}, Accuracy = {}'.format(loss/level,accuracy/level))
-        #print(result[-1])
-    ## validate
-    print("End of Execution")
+#     inds = split_indexes(val_x)
+#     result = []
+#     print("Started execution")
+#     loss = 0
+#     accuracy = 0
+#     level = 0
+#     for start, end in inds:
+#         val_xx = val_x[start:end]
+#         val_yy = val_y[start:end]
+#         batch_x = [[] for x in range(3)]
+#         for row in val_xx.values:
+#             #imgs = []
+#             i = 0
+#             #print(row.shape)
+#             for file in row.tolist()[16:19]:
+#                 file = StaticConfig.getPretrainedImageFromFile(file)
+#                 #print(file)
+#                 batch_x[i].append(cv2.imread(file))
+#                 i+=1
+#             #print(np.stack(batch_x[0]).shape)
+
     
-    ### average
-    loss = 0
-    accuracy = 0
-    for r in result:
-        loss += r[0]
-        accuracy += r[1]
-    return loss/len(result), accuracy/len(result) 
+    return feb_model.evaluate_generator(data_generator_2(val_x, val_y), steps = int(val_x.shape[0]/512))
+#     level += 1
+#         loss += result[-1][0]
+#         accuracy += result[-1][1]
+#         #print(' Loss = {}, Accuracy = {}'.format(loss/level,accuracy/level))
+#         #print(result[-1])
+#     ## validate
+#     print("End of Execution")
+    
+#     ### average
+#     loss = 0
+#     accuracy = 0
+#     for r in result:
+#         loss += r[0]
+#         accuracy += r[1]
+#     return loss/len(result), accuracy/len(result) 
     
     
         
 
 
-# In[19]:
+# In[ ]:
 
 
-#loss, accuracy = run_validation(val_x, val_y, 'weights-improvement-07-0.97.hdf5')
+loss, accuracy = run_validation(val_x, val_y, 'weights-improvement-07-0.97.hdf5')
 #print('Loss = {}, Accuracy = {}'.format(loss, accuracy))
 
 
-# In[ ]:
+# In[13]:
 
 
 val_x.shape
