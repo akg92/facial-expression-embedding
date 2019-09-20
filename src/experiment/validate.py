@@ -12,7 +12,7 @@ from src.limit import limitUsage
 limitUsage("3")
 
 
-# In[12]:
+# In[2]:
 
 
 import pandas as pd
@@ -37,13 +37,13 @@ def get_train_data(train_file):
 
 
 
-# In[13]:
+# In[3]:
 
 
 train_x, train_y, val_x, val_y = get_train_data('../../data/processed_faceexp-comparison-data-train-public.csv')
 
 
-# In[14]:
+# In[4]:
 
 
 from keras_contrib.applications import DenseNet
@@ -173,9 +173,69 @@ def data_generator_2(train_x, train_y, steps = 100, batch_size = 128):
 
     process.join()
     
+    
+def data_generator(train_x, train_y, steps = 100, batch_size = 128):
+    
+    cur_batch = 0
+    # with  ProcessPoolExecutor(max_workers= 10) as pool:
+    folders = ['./temp/val_batch_backup', './temp/val_batch_main']
+    f_i = 0
+    main_folder = folders[1]
+    backup_folder = folders[0]
+#     process = Process(target = process_data_creator, args= (train_x, train_y, main_folder, steps, batch_size))
+#     process.start()
+    #time.sleep(60)
+    #print("hellooooooooooo1")
+    md = int(train_x.shape[0]/batch_size)
+    x, y = None, None
+    while True:        
+        batch_file_name = os.path.join(main_folder, 'batch_'+str(cur_batch)+'.npz')
+        print(batch_file_name)
+        while(not os.path.exists(batch_file_name)):
+            print("skipped" + batch_file_name)
+            cur_batch = (cur_batch + 1)%md
+            continue
+        npzfile = None
+        try:
+            cur_batch = (cur_batch + 1)%md
+            with np.load(batch_file_name, allow_pickle = True) as npzfile:
+                x = np.copy(npzfile['x'])
+                y = np.copy(npzfile['y'])
+        except:
+            continue
+            
+        #cur_batch = (cur_batch + 1)%md
+        
+        yield ([x[0],x[1],x[2]],y )
+            
+#         try:
+#             npzfile =  np.load(batch_file_name)
+#             if(npzfile['x'][0].shape[0] != batch_size or npzfile['y'].shape[0] != batch_size):
+#                 cur_batch = (cur_batch + 1)%md
+#                 print("skipped" + batch_file_name)
+                
+#         except:
+#             cur_batch = (cur_batch + 1)%md
+#             continue
+#         cur_batch = (cur_batch + 1)%md
+        
+        
+            
+        #print(batch_file_name)
+        ## remove used file
+        #os.remove(batch_file_name)
+        #print("helloooooooooooo")
+        #print('{}:{}:{}'.format(npzfile['x'][0].shape,npzfile['x'][1].shape, npzfile['x'][2].shape))
+        #yield ([npzfile['x'][0], npzfile['x'][1], npzfile['x'][2]],npzfile['y'] )
+     
 
 
-# In[15]:
+    
+
+    
+
+
+# In[5]:
 
 
 
@@ -217,7 +277,7 @@ def run_validation(val_x, val_y, model_file):
 #             #print(np.stack(batch_x[0]).shape)
 
     
-    return feb_model.evaluate_generator(data_generator_2(val_x, val_y), steps = int(val_x.shape[0]/128))
+    return feb_model.evaluate_generator(data_generator(val_x, val_y), steps = int(val_x.shape[0]/128))
 #     level += 1
 #         loss += result[-1][0]
 #         accuracy += result[-1][1]
@@ -241,7 +301,7 @@ def run_validation(val_x, val_y, model_file):
 # In[ ]:
 
 
-loss, accuracy = run_validation(val_x, val_y, 'weights-improvement-07-0.97.hdf5')
+#loss, accuracy = run_validation(val_x, val_y, 'weights-improvement-07-0.97.hdf5')
 #print('Loss = {}, Accuracy = {}'.format(loss, accuracy))
 
 
@@ -273,7 +333,7 @@ def calc_all():
 calc_all()
 
 
-# In[10]:
+# In[ ]:
 
 
 val_x.shape
