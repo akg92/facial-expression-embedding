@@ -134,6 +134,7 @@ def data_generator_2(train_x, train_y, steps = 100, batch_size = 128):
 
 # In[15]:
 
+data_generator_2(val_x, val_y)
 
 
 
