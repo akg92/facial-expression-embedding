@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[21]:
+# In[1]:
 
 
 import sys
@@ -12,7 +12,7 @@ from src.limit import limitUsage
 limitUsage("3")
 
 
-# In[22]:
+# In[19]:
 
 
 import pandas as pd
@@ -37,13 +37,13 @@ def get_train_data(train_file):
 
 
 
-# In[23]:
+# In[20]:
 
 
 train_x, train_y, val_x, val_y = get_train_data('../../data/processed_faceexp-comparison-data-train-public.csv')
 
 
-# In[27]:
+# In[23]:
 
 
 from keras_contrib.applications import DenseNet
@@ -52,6 +52,7 @@ import keras
 from keras.models import Model
 from keras.layers import AveragePooling2D, Dense, Flatten,BatchNormalization, Input, Lambda, Concatenate, concatenate
 import keras.optimizers as optimizer
+from src.config.staticConfig import StaticConfig
 
 # Logic of the loss function
 #     if label == 1:
@@ -109,8 +110,6 @@ def data_generator_threaded(train_x, train_y, index, folder, batch_size):
         #imgs = []
         i = 0
         for file in row.tolist()[16:19]:
-            file = StaticConfig.getPretrainedImageFromFile(file)
-            #print(file)
             batch_x[i].append(cv2.imread(file))
             i+=1
             #batch_x.append(imgs)
@@ -135,10 +134,10 @@ def process_data_creator(train_x, train_y,temp_folder, steps = 100, batch_size =
         ## create 200 files
         with  ThreadPoolExecutor(max_workers= 5) as pool:
             for i in range(200):
-                if(max_iteration == max_iteration):
+                if(max_iteration == cur_iteration):
                     break
-                    future = pool.submit(data_generator_threaded, train_x, train_y, cur_iteration, temp_folder, batch_size)
-                    cur_iteration += 1
+                future = pool.submit(data_generator_threaded, train_x, train_y, cur_iteration, temp_folder, batch_size)
+                cur_iteration += 1
             pool.shutdown(wait = True)  
         time.sleep(60)
     
@@ -172,12 +171,23 @@ def data_generator_2(train_x, train_y, steps = 100, batch_size = 512):
     
 
 
+# In[25]:
+
+
+gn = data_generator_2(val_x, val_y)
+
+
+# In[26]:
+
+
+next(gn)
+
+
 # In[32]:
 
 
 
 from keras.models import load_model
-from src.config.staticConfig import StaticConfig
 def split_indexes(df, batch = 512):
     n = df.shape[0]
     inds = []
