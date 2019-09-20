@@ -130,7 +130,7 @@ def data_generator_2(train_x, train_y, steps = 100, batch_size = 128):
     for process in ps:
         process.join()
     #print("hellooooooooooo1")
-    process.join()
+    #process.join()
 
 # In[15]:
 
