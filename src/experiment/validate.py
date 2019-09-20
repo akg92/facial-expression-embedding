@@ -135,14 +135,14 @@ def process_data_creator(train_x, train_y,temp_folder, steps = 100, batch_size =
     max_iteration = int(train_x.shape[0]/batch_size)
     for cur_iteration in range(max_iteration):
         ## create 200 files
-        with  ThreadPoolExecutor(max_workers= 5) as pool:
+        with  ThreadPoolExecutor(max_workers= 10) as pool:
             for i in range(200):
                 if(max_iteration == cur_iteration):
                     break
                 future = pool.submit(data_generator_threaded, train_x, train_y, cur_iteration, temp_folder, batch_size)
                 cur_iteration += 1
             pool.shutdown(wait = True)  
-        time.sleep(60)
+        #time.sleep(60)
     
 from multiprocessing import Process        
 def data_generator_2(train_x, train_y, steps = 100, batch_size = 128):
@@ -164,7 +164,7 @@ def data_generator_2(train_x, train_y, steps = 100, batch_size = 128):
             pass
         npzfile = np.load(batch_file_name, allow_pickle= True)
         cur_batch = cur_batch + 1  
-        print(batch_file_name)
+        #print(batch_file_name)
         ## remove used file
         #os.remove(batch_file_name)
         #print("helloooooooooooo")
