@@ -318,7 +318,7 @@ val_x.shape
 import os
 import glob
 def calc_all():
-    f.write('level, loss, accuracy, file_name')
+    # f.write('level, loss, accuracy, file_name')
     for file in glob.glob('*.hdf5'):
         iteration = int(file.split("-")[1])
         if iteration > 100:
