@@ -318,18 +318,20 @@ val_x.shape
 import os
 import glob
 def calc_all():
-    with open('val_result.csv','w') as f:
-        f.write('level, loss, accuracy, file_name')
-        for file in glob.glob('*.hdf5'):
-            try:
-                loss, accuracy = run_validation(val_x, val_y, file)
-                iteration = int(file.split("-")[1])
+    f.write('level, loss, accuracy, file_name')
+    for file in glob.glob('*.hdf5'):
+        iteration = int(file.split("-")[1])
+        if iteration > 100:
+            continue
+        try:
+            loss, accuracy = run_validation(val_x, val_y, file)
+            with open('val_result.csv','w+') as f:
                 f.write('{},{},{},{}'.format(iteration, loss, accuracy,file))
-                
-            except:
-                print('failed '+file)
-                pass
             
+        except:
+            print('failed '+file)
+            pass
+        
 calc_all()
 
 
