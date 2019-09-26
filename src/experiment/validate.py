@@ -320,7 +320,7 @@ import glob
 def calc_all():
     # f.write('level, loss, accuracy, file_name')
     for file in glob.glob('*.hdf5'):
-        iteration = int(file.split("-")[1])
+        iteration = int(file.split("-")[2])
         if iteration > 100:
             continue
         try:
