@@ -133,7 +133,7 @@ def calc_all(csv_file_name, model_folder ):
     # f.write('level, loss, accuracy, file_name')
     for file in glob.glob(model_folder+'*.hdf5'):
         iteration = int(file.split("-")[2])
-        if iteration > 30:
+        if iteration > 6:
             continue
         try:
             loss, accuracy = run_validation(val_x, val_y, file)
