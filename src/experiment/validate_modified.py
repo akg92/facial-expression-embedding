@@ -129,26 +129,23 @@ def run_validation(val_x, val_y, model_file):
 
 import os
 import glob
-def calc_all():
+def calc_all(csv_file_name, model_folder ):
     # f.write('level, loss, accuracy, file_name')
-    for file in glob.glob('*.hdf5'):
+    for file in glob.glob(model_folder+'*.hdf5'):
         iteration = int(file.split("-")[2])
         if iteration > 30:
             continue
         try:
             loss, accuracy = run_validation(val_x, val_y, file)
-            with open('val_result.csv','w+') as f:
+            with open(csv_file_name,'a+') as f:
                 f.write('{},{},{},{}'.format(iteration, loss, accuracy,file))
             
         except:
             print('failed '+file)
             pass
-        
-calc_all()
 
+csv_file_name = 'val_result.csv' if len(sys.argv) < 2 else sys.argv[1]
+model_folder = './' if len(sys.argv) <3 else sys.argv[2]
+calc_all(csv_file_name)
 
-# In[ ]:
-
-
-val_x.shape
 
