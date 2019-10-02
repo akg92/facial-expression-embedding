@@ -208,13 +208,12 @@ train_x, train_y, val_x, val_y = get_train_data('../../data/processed_faceexp-co
 
 from keras.callbacks import ModelCheckpoint
 batch_size = 64
-filepath="weights-improvement-{epoch:02d}-{val_accuracy_c:.2f}.hdf5"
+filepath="./dropout2/weights-improvement-{epoch:02d}-{val_accuracy_c:.2f}.hdf5"
 checkpoint = ModelCheckpoint(filepath, save_best_only=False)
 callbacks_list = [checkpoint]
 samples_per_epoch= 500
-history = embedding_model.fit_generator(data_generator_threaded(train_x, train_y, batch_size), 
-    validation_data = validation_generator(val_x, val_y,batch_size), 
-    validation_steps = 1 , samples_per_epoch= samples_per_epoch,callbacks=callbacks_list, 
+history = embedding_model.fit_generator(data_generator_threaded(train_x, train_y, batch_size),
+    samples_per_epoch= samples_per_epoch,callbacks=callbacks_list, 
     nb_epoch=50, workers= 5, use_multiprocessing= True, max_queue_size=25 )
 
 
