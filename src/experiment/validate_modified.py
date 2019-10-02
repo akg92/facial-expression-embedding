@@ -129,11 +129,11 @@ def run_validation(val_x, val_y, model_file):
 
 import os
 import glob
-def calc_all(csv_file_name, model_folder ):
+def calc_all(csv_file_name, model_folder,max_iter ):
     # f.write('level, loss, accuracy, file_name')
     for file in glob.glob(model_folder+'*.hdf5'):
         iteration = int(file.split("-")[2])
-        if iteration > 6:
+        if iteration > max_iter:
             continue
         try:
             loss, accuracy = run_validation(val_x, val_y, file)
@@ -146,7 +146,8 @@ def calc_all(csv_file_name, model_folder ):
 
 csv_file_name = 'val_result.csv' if len(sys.argv) < 2 else sys.argv[1]
 model_folder = './' if len(sys.argv) <3 else sys.argv[2]
+max_iter = 20 if len(sys.argv) < 4 else  int(sys.argv[3])
 print('model_folder = {}, csv_file_name = {} '.format(model_folder, csv_file_name))
-calc_all(csv_file_name,model_folder)
+calc_all(csv_file_name,model_folder, max_iter)
 
 
