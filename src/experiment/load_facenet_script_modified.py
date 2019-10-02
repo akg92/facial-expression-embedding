@@ -84,7 +84,7 @@ def data_generator_threaded(train_x, train_y, batch_size):
                     i+=1
         except:
             continue
-        yield np.stack(batch_x[0], axis =0), np.stack(batch_x[1], axis =0), np.stack(batch_x[2], axis =0)
+        yield [np.stack(batch_x[0], axis =0), np.stack(batch_x[1], axis =0), np.stack(batch_x[2], axis =0)],batch_y
     
 
 
