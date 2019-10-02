@@ -66,8 +66,56 @@ def temp_generator(arr):
         
 
 
+def split_class_variation(x, y ):
+    labels = [ 'ONE_CLASS_TRIPLET', 
+        'TWO_CLASS_TRIPLET','THREE_CLASS_TRIPLET']
+    xs = []
+    ys = []
+    for label in labels:
+        x_x =  x[ x[15] ==label].index.tolist()
+        #y_y =  y[ x[15] == label].index.tolist()
+        xs.append(x_x)
+        ys.append( x_x)
+
+    return xs, ys
+
+def generate_indexes(xs, batch_size):
+    splits =[ batch_size//3, batch_size//3, batch_size - (batch_size//3 ) *2]
+
+    indexes = []
+    for i in range(3):
+        indexes.extend(np.random.choice(xs[i],splits[i]))
+    
+    return indexes
+    
+def data_generator_balanced(train_x, train_y, batch_size):
+    row_count = train_x.shape[0]
+    xs, ys = split_class_variation(train_x, train_y)
+    while True:
+        indexes = generate_indexes(xs, batch_size)
+        #print(indexes)
+        batch_x = [[] for x in range(3)]
+        batch_y = train_y.iloc[indexes].values
+        batch_y = np.reshape(batch_y, (-1,1))
+        try:
+            for row in train_x.iloc[indexes].values:
+                i = 0
+                for file in row.tolist()[16:19]:
+                    file = StaticConfig.getPretrainedImageFromFile(file)
+                    #print(file)
+                    batch_x[i].append(cv2.imread(file))
+                    i+=1
+        except:
+            continue
+        yield [np.stack(batch_x[0], axis =0), np.stack(batch_x[1], axis =0), np.stack(batch_x[2], axis =0)],batch_y
+
+
+
+
+
+
 def data_generator_threaded(train_x, train_y, batch_size):
-    row_count = train_x.shape[0]    
+    row_count = train_x.shape[0]
     while True:
         indexes = np.random.randint( 0, row_count, size = batch_size )
         #print(indexes)
@@ -166,13 +214,13 @@ def create_new_model(input_shape):
     inter_shape =  model1.output_shape[1:]
 
     dense = DenseNet(
-                     input_shape = inter_shape, dropout_rate=0.5, nb_filter = 600, include_top = False,  depth = 1, nb_dense_block = 2, growth_rate = 32)(model1.output)
+                     input_shape = inter_shape, dropout_rate=0.2, nb_filter = 600, include_top = False,  depth = 1, nb_dense_block = 2, growth_rate = 32)(model1.output)
 
     x = AveragePooling2D(pool_size=(4,4), name='cutome_avg_pool_1')(dense)
     x = Flatten(name  = 'cutome_flatten_2')(x)
     x = Dense(512, activation='relu', name = 'custome_dense_dense_3')(x)
     x = BatchNormalization(name='cutome_batch_normalization_4')(x)
-    x = Dropout(0.5)(x)
+    x = Dropout(0.2)(x)
     x = Dense(20, activation='relu', name = 'custome_dense_5')(x)
     x = Lambda(lambda  x: K.l2_normalize(x,axis=1), name = 'custome_l2_normalize_6')(x)
     
@@ -207,12 +255,12 @@ train_x, train_y, val_x, val_y = get_train_data('../../data/processed_faceexp-co
 
 
 from keras.callbacks import ModelCheckpoint
-batch_size = 64
+batch_size = 120
 filepath="./dropout3/weights-improvement-{epoch:02d}-{val_accuracy_c:.2f}.hdf5"
 checkpoint = ModelCheckpoint(filepath, save_best_only=False)
 callbacks_list = [checkpoint]
 samples_per_epoch= 100
-history = embedding_model.fit_generator(data_generator_threaded(train_x, train_y, batch_size),
+history = embedding_model.fit_generator(data_generator_balanced(train_x, train_y, batch_size),
     samples_per_epoch= samples_per_epoch,callbacks=callbacks_list,
     validation_data = data_generator_threaded(val_x, val_y, batch_size), validation_steps= 20, 
     nb_epoch=50, workers= 5, use_multiprocessing= True, max_queue_size=25 )
