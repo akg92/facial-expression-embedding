@@ -207,7 +207,7 @@ train_x, train_y, val_x, val_y = get_train_data('../../data/processed_faceexp-co
 
 
 from keras.callbacks import ModelCheckpoint
-batch_size = 128
+batch_size = 64
 filepath="weights-improvement-{epoch:02d}-{val_accuracy_c:.2f}.hdf5"
 checkpoint = ModelCheckpoint(filepath, save_best_only=False)
 callbacks_list = [checkpoint]
