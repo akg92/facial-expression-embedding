@@ -146,6 +146,7 @@ def calc_all(csv_file_name, model_folder ):
 
 csv_file_name = 'val_result.csv' if len(sys.argv) < 2 else sys.argv[1]
 model_folder = './' if len(sys.argv) <3 else sys.argv[2]
-calc_all(csv_file_name)
+print('model_folder = {}, csv_file_name = {} '.format(model_folder, csv_file_name))
+calc_all(csv_file_name,model_folder)
 
 
