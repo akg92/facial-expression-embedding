@@ -120,7 +120,7 @@ def data_generator_threaded(train_x, train_y, batch_size):
     
 def run_validation(val_x, val_y, model_file):
     feb_model = load_model(model_file,  custom_objects=dict(loss_fun=loss_fun,accuracy_c=accuracy_c))
-    batch_size = 64
+    batch_size = 128
     return feb_model.evaluate_generator(data_generator_threaded(val_x, val_y, batch_size), 
         steps = val_x.shape[0]//batch_size, max_queue_size = 25, workers = 1)
     
