@@ -72,7 +72,7 @@ def split_class_variation(x, y ):
     xs = []
     ys = []
     for label in labels:
-        x_x =  x[ x[15] ==label].index.tolist()
+        x_x =  x[ x.apply( lambda l: l.tolist()[15] == label, axis = 1)].index.tolist()
         #y_y =  y[ x[15] == label].index.tolist()
         xs.append(x_x)
         ys.append( x_x)
