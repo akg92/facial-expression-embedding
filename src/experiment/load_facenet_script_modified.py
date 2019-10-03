@@ -256,7 +256,7 @@ train_x, train_y, val_x, val_y = get_train_data('../../data/processed_faceexp-co
 
 from keras.callbacks import ModelCheckpoint
 batch_size = 120
-filepath="./dropout3/weights-improvement-{epoch:02d}-{val_accuracy_c:.2f}.hdf5"
+filepath="./dropout_balanced/weights-improvement-{epoch:02d}-{val_accuracy_c:.2f}.hdf5"
 checkpoint = ModelCheckpoint(filepath, save_best_only=False)
 callbacks_list = [checkpoint]
 samples_per_epoch= 100
@@ -268,6 +268,6 @@ history = embedding_model.fit_generator(data_generator_balanced(train_x, train_y
 
 
 import pickle
-with open('trainHistoryDict', 'wb') as file_pi:
+with open('trainHistoryDict_balanced', 'wb') as file_pi:
     pickle.dump(history.history, file_pi)
 
