@@ -263,7 +263,7 @@ samples_per_epoch= 100
 history = embedding_model.fit_generator(data_generator_balanced(train_x, train_y, batch_size),
     samples_per_epoch= samples_per_epoch,callbacks=callbacks_list,
     validation_data = data_generator_threaded(val_x, val_y, batch_size), validation_steps= 20, 
-    nb_epoch=50, workers= 5, use_multiprocessing= True, max_queue_size=25 )
+    nb_epoch=30, workers= 5, use_multiprocessing= True, max_queue_size=25 )
 
 
 
