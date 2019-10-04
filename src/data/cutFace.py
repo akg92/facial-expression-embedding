@@ -37,8 +37,31 @@ def predict(model_obj, img_file):
     rep = model_obj.predict(np.array([img]))
     return rep[0]
 
+"""
+compute similarity
+"""
+def compute_most_similar(file_ids, result):
+
+    n  = len(file_ids)
+    similarity = []
+    for i in range( n):
+        distance = np.zeros(n)
+        for j in range(n):
+            distance[j] = np.linalg.norm(result[i] - result[j])
+        
+        pos = np.argsort(distance)
+        s = [] 
+        for p in pos:
+            if( p != i):
+                s.append(file_ids[p])
+        similarity.append(s)
+    return similarity
+                   
+
+
+
 from keras.models import load_model
-def rep_all(model_file , in_dir, out_dir, result_file_path ):
+def rep_all(model_file , in_dir, out_dir, result_folder_path ):
     
     cut_images(in_dir , out_dir)
     loaded_model  = load_model(model_file)
@@ -49,9 +72,12 @@ def rep_all(model_file , in_dir, out_dir, result_file_path ):
         processed_file = get_out_file_name(out_dir, file_name)
         result.append ( predict(load_model, processed_file))
         file_ids.append(file_name)
-    result = np.column_stack([file_ids,result])
-    np.savetxt( result_file_path , result, delimiter=',')
     
+    similarity = compute_most_similar(file_ids, result)
+    result = np.column_stack([file_ids,result])
+    np.savetxt( os.path.join(result_folder_path, 'prediction.csv'), result, delimiter=',')
+    np.savetxt( os.path.join( result_folder_path, 'similar.csv'), np.array(similarity), delimiter = ',' )
+
 import sys
 model_file = sys.argv[1]
 in_dir = sys.argv[2]
