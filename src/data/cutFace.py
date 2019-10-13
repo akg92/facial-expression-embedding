@@ -112,7 +112,7 @@ def rep_all(model_file , in_dir, out_dir, result_folder_path ):
     file_ids = []
     for file_name in os.listdir(in_dir):
         processed_file = get_out_file_name(out_dir, file_name)
-        result.append ( predict(load_model, processed_file))
+        result.append ( predict(loaded_model, processed_file))
         file_ids.append(file_name)
     
     similarity = compute_most_similar(file_ids, result)
