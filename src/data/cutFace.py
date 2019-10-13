@@ -50,7 +50,7 @@ def compute_most_similar(file_ids, result):
             distance[j] = np.linalg.norm(result[i] - result[j])
         
         pos = np.argsort(distance)
-        s = [] 
+        s = [ file_ids[i] ] 
         for p in pos:
             if( p != i):
                 s.append(file_ids[p])
