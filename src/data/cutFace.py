@@ -78,7 +78,7 @@ def cut_images(folder_name, out_dir):
 import numpy as np
 def predict(model_obj, img_file):
     img = cv2.imread(img_file)
-    rep = model_obj.predict(np.array([img]))
+    rep = model_obj.predict([ np.array([img]), np.array([img]), np.array([img]) ] )
     return rep[0]
 
 """
