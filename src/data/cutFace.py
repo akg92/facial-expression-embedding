@@ -69,8 +69,9 @@ def cut_images(folder_name, out_dir):
     
     if os.path.exists(out_dir):
         os.rmdir(out_dir)
-    
+    print('Foldername = '+ folder_name)
     for file in os.listdir(folder_name):
+        print('file {} = '+ file)
         cut_image(os.path.join(folder_name, file) , out_dir)
 import numpy as np
 def predict(model_obj, img_file):
