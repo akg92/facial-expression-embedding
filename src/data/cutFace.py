@@ -25,6 +25,43 @@ def cut_image(file_name, out_dir):
         resizedImage = cv2.resize(extractedImg, (160, 160))
         cv2.imwrite(out_file_name, resizedImage)  
 
+
+import keras.backend as K 
+    
+def loss_fun(label, pred, delta = 0.001):
+    ## label is of the form [first_pred, second_pred, last_pred]
+    #i label means the i is different from the rest of the pair
+    x,y,z  = pred[:,0], pred[:,1], pred[:,2]
+    n = pred.shape[0]
+    ## y and z is similar
+    l_1 = K.maximum(0.0, K.square(y-z) - K.square(y-x) + delta) + K.maximum(0.0, K.square(y-z) - K.square(z- x) + delta)
+    l_2 = K.maximum(0.0, K.square(x-z) - K.square( x- y) + delta) + K.maximum(0.0, K.square(x - z) - K.square(y- z) + delta)
+    l_3  = K.maximum(0.0, K.square(x- y) - K.square( x -z) + delta) + K.maximum(0.0, K.square(x- y) - K.square( y- z ) + delta)
+    
+    l_1_eq = K.cast(K.equal(label, 1),'float32')
+    l_2_eq = K.cast(K.equal(label, 2), 'float32')
+    l_3_eq = K.cast(K.equal(label, 3), 'float32')
+    
+    return K.mean(K.sum([l_1*l_1_eq , l_2 * l_2_eq*l_2 , l_3_eq * l_3], axis = 1 ))
+
+        
+def accuracy_c(label, pred, delta = 0.0):
+    x,y,z  = pred[:,0], pred[:,1], pred[:,2]
+    n = pred.shape[0]
+    ## y and z is similar
+    l_1 = K.maximum(0.0, K.square(y-z) - K.square(y-x) + delta) + K.maximum(0.0, K.square(y-z) - K.square(z- x) + delta)
+    l_2 = K.maximum(0.0, K.square(x-z) - K.square( x- y) + delta) + K.maximum(0.0, K.square(x - z) - K.square(y- z) + delta)
+    l_3  = K.maximum(0.0, K.square(x- y) - K.square( x -z) + delta) + K.maximum(0.0, K.square(x- y) - K.square( y- z ) + delta)
+    
+    l_1_eq = K.cast(K.equal(label, 1),'float32')
+    l_2_eq = K.cast(K.equal(label, 2), 'float32')
+    l_3_eq = K.cast(K.equal(label, 3), 'float32')
+    s = K.sum([l_1*l_1_eq , l_2 * l_2_eq*l_2 , l_3_eq * l_3], axis = 1 )
+    
+    #s = loss_fun(K.cast(y_true, 'int32'), y_pred)
+    return K.equal(s, 0.0)
+
+
 """
     Pre process all the files in the folder
 """
@@ -69,7 +106,7 @@ def rep_all(model_file , in_dir, out_dir, result_folder_path ):
     
     cut_images(in_dir , out_dir)
     print(model_file)
-    loaded_model  = load_model(model_file)
+    loaded_model  = load_model(model_file, custom_objects=dict(loss_fun=loss_fun,accuracy_c=accuracy_c) )
 
     result = []
     file_ids = []
