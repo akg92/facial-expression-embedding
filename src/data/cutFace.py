@@ -68,6 +68,7 @@ from keras.models import load_model
 def rep_all(model_file , in_dir, out_dir, result_folder_path ):
     
     cut_images(in_dir , out_dir)
+    print(model_file)
     loaded_model  = load_model(model_file)
 
     result = []
