@@ -1,9 +1,11 @@
 from mira.core import Image
+from mira import detectors
 import cv2
 import os
 from src.limit import limitUsage
 limitUsage("2")
 
+det = detectors.MTCNN()
 def get_out_file_name(out_dir, file_name):
     f_name = os.path.basename(file_name)
     return os.path.join(out_dir, 'processed_'+ f_name)
@@ -11,7 +13,7 @@ def get_out_file_name(out_dir, file_name):
 def cut_image(file_name, out_dir):
     out_file_name = get_out_file_name(out_dir, file_name)    
     m_image = cv2.imread(file_name)
-    faces = Image.detector.detect(m_image)
+    faces = det.detect(m_image)
     if( not faces or not faces[0]):
         print('face_not_found for {}'.format(file_name))
         resizedImage = cv2.resize(m_image, (160, 160))
