@@ -76,6 +76,7 @@ def cut_images(folder_name, out_dir):
         print('file {} = '+ file)
         cut_image(os.path.join(folder_name, file) , out_dir)
 import numpy as np
+
 def predict(model_obj, img_file):
     img = cv2.imread(img_file)
     rep = model_obj.predict([ np.array([img]), np.array([img]), np.array([img]) ] )
@@ -105,6 +106,7 @@ def compute_most_similar(file_ids, result):
 
 
 from keras.models import load_model
+import pandas as pd
 def rep_all(model_file , in_dir, out_dir, result_folder_path ):
     
     cut_images(in_dir , out_dir)
@@ -120,8 +122,11 @@ def rep_all(model_file , in_dir, out_dir, result_folder_path ):
     
     similarity = compute_most_similar(file_ids, result)
     result = np.column_stack([file_ids,result])
-    np.savetxt( os.path.join(result_folder_path, 'prediction.csv'), result, delimiter=',')
-    np.savetxt( os.path.join( result_folder_path, 'similar.csv'), np.array(similarity), delimiter = ',' )
+    pd.DataFrame(result).to_csv(os.path.join(result_folder_path, 'prediction.csv'))
+    pd.DataFrame(similarity).to_csv(os.path.join( result_folder_path, 'similar.csv'))
+    
+    #np.savetxt( os.path.join(result_folder_path, 'prediction.csv'), result, delimiter=',')
+    #np.savetxt( os.path.join( result_folder_path, 'similar.csv'), np.array(similarity), delimiter = ',' )
 
 import sys
 model_file = sys.argv[1]
