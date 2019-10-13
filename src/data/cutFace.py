@@ -1,10 +1,12 @@
-from mira.core import Image
+
 from mira import detectors
+from mira.core import Image
 import cv2
 import os
+from src.config.staticConfig import StaticConfig 
 from src.limit import limitUsage
-limitUsage("2")
 
+limitUsage("2")
 det = detectors.MTCNN()
 def get_out_file_name(out_dir, file_name):
     f_name = os.path.basename(file_name)
@@ -12,7 +14,7 @@ def get_out_file_name(out_dir, file_name):
 
 def cut_image(file_name, out_dir):
     out_file_name = get_out_file_name(out_dir, file_name)    
-    m_image = Image.read(file_name)
+    m_image = Image.read (file_name)
     faces = det.detect(m_image)
     if( not faces or not faces[0]):
         print('face_not_found for {}'.format(file_name))
