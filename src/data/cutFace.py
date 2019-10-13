@@ -70,6 +70,7 @@ def cut_images(folder_name, out_dir):
     
     if os.path.exists(out_dir):
         os.rmdir(out_dir)
+    os.mkdir(out_dir)
     print('Foldername = '+ folder_name)
     for file in os.listdir(folder_name):
         print('file {} = '+ file)
