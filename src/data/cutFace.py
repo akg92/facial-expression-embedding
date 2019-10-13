@@ -12,7 +12,7 @@ def get_out_file_name(out_dir, file_name):
 
 def cut_image(file_name, out_dir):
     out_file_name = get_out_file_name(out_dir, file_name)    
-    m_image = cv2.imread(file_name)
+    m_image = Image.read(file_name)
     faces = det.detect(m_image)
     if( not faces or not faces[0]):
         print('face_not_found for {}'.format(file_name))
