@@ -23,7 +23,7 @@ def cut_image(file_name, out_dir):
     else :
         extractedImg = faces[0].selection.extract(m_image)
         resizedImage = cv2.resize(extractedImg, (160, 160))
-        print(resizedImage)
+        print(out_file_name)
         cv2.imwrite(out_file_name, resizedImage)  
 
 
