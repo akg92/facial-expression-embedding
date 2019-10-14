@@ -86,7 +86,7 @@ import numpy as np
 def predict(model_obj, img_file):
     img = cv2.imread(img_file)
     rep = model_obj.predict([ np.array([img]), np.array([img]), np.array([img]) ] )
-    return rep[0]
+    return rep[0][:20]
 
 """
 compute similarity
