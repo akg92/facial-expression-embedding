@@ -73,6 +73,8 @@ def cut_images(folder_name, out_dir):
     os.mkdir(out_dir)
     print('Foldername = '+ folder_name)
     for file in os.listdir(folder_name):
+        if( file.index('.jp') ==-1):
+            continue
         print('file {} = '+ file)
         cut_image(os.path.join(folder_name, file) , out_dir)
 import numpy as np
@@ -122,8 +124,8 @@ def rep_all(model_file , in_dir, out_dir, result_folder_path ):
     
     similarity = compute_most_similar(file_ids, result)
     result = np.column_stack([file_ids,result])
-    pd.DataFrame(result).to_csv(os.path.join(result_folder_path, 'prediction.csv'))
-    pd.DataFrame(similarity).to_csv(os.path.join( result_folder_path, 'similar.csv'))
+    pd.DataFrame(result).to_csv(os.path.join(result_folder_path, 'prediction.csv'), index = False)
+    pd.DataFrame(similarity).to_csv(os.path.join( result_folder_path, 'similar.csv'), index = False)
     
     #np.savetxt( os.path.join(result_folder_path, 'prediction.csv'), result, delimiter=',')
     #np.savetxt( os.path.join( result_folder_path, 'similar.csv'), np.array(similarity), delimiter = ',' )
