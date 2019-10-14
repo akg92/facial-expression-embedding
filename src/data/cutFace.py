@@ -14,7 +14,11 @@ def get_out_file_name(out_dir, file_name):
 
 def cut_image(file_name, out_dir):
     out_file_name = get_out_file_name(out_dir, file_name)    
-    m_image = Image.read(file_name)
+    m_image = None 
+    try:
+        m_image = Image.read(file_name)
+    except:
+        return 
     faces = det.detect(m_image)
     if( not faces or not faces[0]):
         print('face_not_found for {}'.format(file_name))
@@ -119,6 +123,8 @@ def rep_all(model_file , in_dir, out_dir, result_folder_path ):
     file_ids = []
     for file_name in os.listdir(in_dir):
         processed_file = get_out_file_name(out_dir, file_name)
+        if not os.path.exists(processed_file):
+            continue
         result.append ( predict(loaded_model, processed_file))
         file_ids.append(file_name)
     
