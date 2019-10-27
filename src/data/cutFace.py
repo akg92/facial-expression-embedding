@@ -157,9 +157,9 @@ def rep_all(model_file , in_dir, out_dir, result_folder_path ):
     result = []
     file_ids = []
     for file_name in os.listdir(in_dir):
-        processed_file = get_out_file_name(out_dir, file_name)
-        if not os.path.exists(processed_file):
-            continue
+        processed_file = os.path.join(out_dir, file_name)
+        # if not os.path.exists(processed_file):
+        #     continue
         result.append ( predict(loaded_model, processed_file))
         file_ids.append(file_name)
     
