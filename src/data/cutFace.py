@@ -119,6 +119,7 @@ import numpy as np
 
 def predict(model_obj, img_file):
     img = cv2.imread(img_file)
+    img = cv2.resize(img,(160,160))
     rep = model_obj.predict([ np.array([img]), np.array([img]), np.array([img]) ] )
     return rep[0][:20]
 
@@ -149,7 +150,7 @@ from keras.models import load_model
 import pandas as pd
 def rep_all(model_file , in_dir, out_dir, result_folder_path ):
     
-    cut_images(in_dir , out_dir)
+    #cut_images(in_dir , out_dir)
     print(model_file)
     loaded_model  = load_model(model_file, custom_objects=dict(loss_fun=loss_fun,accuracy_c=accuracy_c) )
 
@@ -173,10 +174,10 @@ def rep_all(model_file , in_dir, out_dir, result_folder_path ):
 import sys
 model_file = sys.argv[1]
 in_dir = sys.argv[2]
-out_dir = sys.argv[3] 
-result_file_path = sys.argv[4]
+#out_dir = sys.argv[3] 
+result_file_path = sys.argv[3]
 
-rep_all(model_file, in_dir, out_dir, result_file_path)
+rep_all(model_file, in_dir, in_dir, result_file_path)
 
 
 
