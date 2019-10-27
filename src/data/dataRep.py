@@ -73,12 +73,12 @@ class Image():
         if( not faces or not faces[0]):
             print('face_not_found for {}'.format(originalFileName))
             resizedImage = cv2.resize(cutIme, (160, 160))
-            cv2.imwrite(processdFileName, resizedImage) 
+            cv2.imwrite(processdFileName, cv2.cvtColor( resizedImage, cv2.COLOR_RGB2BGR)) 
         
         else :
             extractedImg = faces[0].selection.extract(mImage)
             resizedImage = cv2.resize(extractedImg, (160, 160))
-            cv2.imwrite(processdFileName, resizedImage) 
+            cv2.imwrite(processdFileName, cv2.cvtColor( resizedImage, cv2.COLOR_RGB2BGR)) 
         ## clear temp file
         counter.dec()
         os.remove(tempFileName)

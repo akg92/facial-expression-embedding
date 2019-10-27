@@ -12,6 +12,12 @@ def get_out_file_name(out_dir, file_name):
     f_name = os.path.basename(file_name)
     return os.path.join(out_dir, 'processed_'+ f_name)
 
+
+def get_out_file_name_mulit(out_dir, file_name,index):
+    f_name = os.path.basename(file_name)
+    return os.path.join(out_dir, 'processed_'+str(index)+"_"+ f_name)
+
+
 def cut_image(file_name, out_dir):
     out_file_name = get_out_file_name(out_dir, file_name)    
     m_image = None 
@@ -23,13 +29,39 @@ def cut_image(file_name, out_dir):
     if( not faces or not faces[0]):
         print('face_not_found for {}'.format(file_name))
         resizedImage = cv2.resize(m_image, (160, 160))
-        cv2.imwrite(out_file_name, resizedImage)
+        cv2.imwrite(out_file_name, cv2.cvtColor( resizedImage, cv2.COLOR_RGB2BGR))
     else :
         extractedImg = faces[0].selection.extract(m_image)
         resizedImage = cv2.resize(extractedImg, (160, 160))
         print(out_file_name)
-        cv2.imwrite(out_file_name, resizedImage)  
+        cv2.imwrite(out_file_name, cv2.cvtColor(resizedImage, cv2.COLOR_RGB2BGR))  
 
+
+
+def cut_image_multi(file_name, out_dir):
+    #out_file_name = get_out_file_name(out_dir, file_name)    
+    m_image = None 
+    try:
+        m_image = Image.read(file_name)
+    except:
+        return 
+    faces = det.detect(m_image)
+    if( not faces or not faces[0]):
+        for i  in range(len(faces)):
+            if(not faces[i]):
+                continue
+            out_file_name = get_out_file_name_mulit(out_dir, file_name,i)    
+            #print('face_not_found for {}'.format(file_name))
+            resizedImage = cv2.resize(m_image, (160, 160))
+            cv2.imwrite(out_file_name, resizedImage)
+    else :
+        ## no face found
+        pass
+        # extractedImg = faces[0].selection.extract(m_image)
+        # resizedImage = cv2.resize(extractedImg, (160, 160))
+        # print(out_file_name)
+        
+        # cv2.imwrite(out_file_name, resizedImage)  
 
 import keras.backend as K 
     
