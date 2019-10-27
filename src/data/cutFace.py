@@ -99,6 +99,7 @@ def accuracy_c(label, pred, delta = 0.0):
     return K.equal(s, 0.0)
 
 
+import shutil
 """
     Pre process all the files in the folder
 """
@@ -106,13 +107,14 @@ def cut_images(folder_name, out_dir):
     
     if os.path.exists(out_dir):
         os.rmdir(out_dir)
-    os.mkdir(out_dir)
+    #os.mkdir(out_dir)
     print('Foldername = '+ folder_name)
-    for file in os.listdir(folder_name):
-        if( file.index('.jp') ==-1):
-            continue
-        print('file {} = '+ file)
-        cut_image(os.path.join(folder_name, file) , out_dir)
+    shutil.copytree(folder_name, out_dir)
+    # for file in os.listdir(folder_name):
+    #     if( file.index('.jp') ==-1):
+    #         continue
+    #     print('file {} = '+ file)
+    #     cut_image(os.path.join(folder_name, file) , out_dir)
 import numpy as np
 
 def predict(model_obj, img_file):
